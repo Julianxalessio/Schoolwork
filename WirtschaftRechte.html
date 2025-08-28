@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>School</title>
+    <link rel="stylesheet" href="navbar.css">
+    <style>
+        .Body {
+            display: flex;
+            position: fixed;
+            top: 60px;
+            left: 0;
+            width: 100%;
+            height: 85%;
+            justify-content: space-between;
+        }
+
+        .ItemContainer {
+            width: 50%;
+            height: 100%;
+            border: 3px black solid;
+            border-radius: 10px;
+            margin: 20px;
+            text-align: center;
+            padding: 5px;
+        }
+
+        .ItemContainer a {
+            font-size: 2em;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        table {
+            width: 100%;
+            font-size: 1.5em;
+            border-collapse: collapse;
+        }
+
+        tr {
+            border-bottom: 1px solid black;
+            padding: 8px;
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navBar">
+        <a href="index.html" class="navBarItem">Home</a>
+        <!--BM-->
+        <a href="WirtschaftRechte.html" class="navBarItem active">Wirtschaft & Recht</a>
+        <a href="Deutsch.html" class="navBarItem">Deutsch</a>
+        <a href="Französisch.html" class="navBarItem">Französisch</a>
+        <a href="Sport.html" class="navBarItem">Sport</a>
+        <a href="Mathe.html" class="navBarItem">Mathe</a>
+        <!--Berufsschule-->
+        <a href="ModulVormittag.html" class="navBarItem">Modul morgen</a>
+        <a href="ModulNachmittag.html" class="navBarItem">Modul nachmittag</a>
+
+        <a onclick="showAdminField()" class="adminLogin navBarItem">@</a>
+    </nav>
+    <div class="adminField hide" id="adminFieldID">
+        <input type="text" id="PasswortInput" placeholder="Adminpasswort:">
+        <button onclick="SubmitAdminPasswort()">Submit</button>
+        <input type="text" id="EventName" placeholder="Eventname:">
+        <select name="TypeOfNewEvent" id="eventTyp" title="EventType">
+            <option value="Test">Test</option>
+            <option value="Husi">Hausaufgaben</option>
+        </select>
+        <input type="date" id="EventDate" placeholder="Datum">
+        <button onclick="getEventPropertys()">Create Event</button>
+    </div>
+    <div class="Body">
+        <div class="ItemContainer">
+            <a><u>Test</u></a>
+            <table id="TableTest">
+                <tr class="Zeile">
+                    <th>Aufgabe</th>
+                    <th>Bis wann</th>
+                    <th>Löschen</th>
+                </tr>
+
+            </table>
+        </div>
+        <div class="ItemContainer">
+            <a><u>Hausaufgaben</u></a>
+            <table id="TableTask">
+                <tr class="Zeile">
+                    <th>Aufgabe</th>
+                    <th>Bis wann</th>
+                    <th>Löschen</th>
+                </tr>
+
+            </table>
+        </div>
+    </div>
+    <footer>
+        <a>Bei Fehler: e272897@sbl.ch oder e224719@sbl.ch</a>
+    </footer>
+    <script src="SortTable.js"></script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import { getDatabase, ref, set, get, child, remove, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+        const firebaseConfig = {
+            apiKey: "AIzaSyA1f1LlbGrevYqPojOGjFZZFeSCg_TiPYI",
+            authDomain: "classroom-26016.firebaseapp.com",
+            databaseURL: "https://classroom-26016-default-rtdb.firebaseio.com",
+            projectId: "classroom-26016",
+            storageBucket: "classroom-26016.firebasestorage.app",
+            messagingSenderId: "494692974948",
+            appId: "1:494692974948:web:39458c2d78189f2a34fa71",
+            measurementId: "G-JM2KZCLH3W"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        window.getTests = function (){
+            const db = getDatabase();
+            const filesRef = ref(db, `WirtschaftRecht/Test`);
+            onValue(filesRef, (snapshot) => {
+            const data = snapshot.val(); // Daten von Firebase
+            if (!data) {
+                console.log("Keine Daten vorhanden");
+                return; // Abbruch, falls snapshot leer ist
+            }
+            arr = Object.entries(data).map(([titel, daten]) => {
+                if (!daten) return `${titel}: keine Daten`; 
+                const datenString = Object.entries(daten)
+                    .map(([key, value]) => `${key}:${value}`)
+                    .join(", ");
+                return `${titel}: ${datenString}`;
+                });
+                LoadEventsIntoTablefromDatabase();
+            });
+            
+        }
+        window.uploadTestToFirebase = function (ID, Name, Datum){
+            const dbRef = ref(db, `WirtschaftRecht/Test/${ID}`);
+                set(dbRef, {
+                    Datum: Datum,
+                    Name: Name
+                }).catch((error) => {
+                    console.error("Fehler beim Speichern:", error);
+                });
+        }
+
+        window.getTasks = function (){
+            const db = getDatabase();
+            const filesRef = ref(db, `WirtschaftRecht/Task`);
+            onValue(filesRef, (snapshot) => {
+            const data = snapshot.val(); // Daten von Firebase
+            if (!data) {
+                console.log("Keine Daten vorhanden");
+                return; // Abbruch, falls snapshot leer ist
+            }
+            arrTask = Object.entries(data).map(([titel, daten]) => {
+                if (!daten) return `${titel}: keine Daten`; 
+                const datenString = Object.entries(daten)
+                    .map(([key, value]) => `${key}:${value}`)
+                    .join(", ");
+                return `${titel}: ${datenString}`;
+                });
+                LoadTasksIntoTablefromDatabase();
+            });
+            
+        }
+        window.uploadTaskToFirebase = function (ID, Name, Datum){
+            const dbRef = ref(db, `WirtschaftRecht/Task/${ID}`);
+                set(dbRef, {
+                    Datum: Datum,
+                    Name: Name
+                }).catch((error) => {
+                    console.error("Fehler beim Speichern:", error);
+                });
+                
+        }
+        getTasks();
+        getTests();
+    </script>
+    <script>
+        
+        let arr;
+        let arrTask;
+
+        function LoadEventsIntoTablefromDatabase() {
+            arr.forEach(eintrag => {
+                // Example eintrag: "Asdf1232025-08-30: Datum:2025-08-30, Name:Asdf123"
+                const datumMatch = eintrag.match(/Datum:([0-9\-]+)/);
+                const nameMatch = eintrag.match(/Name:([^,]+)/);
+
+                const datum = datumMatch ? datumMatch[1].trim() : "";
+                const name = nameMatch ? nameMatch[1].trim() : "";
+
+                let NewTR = document.createElement("tr");
+                let ID = name + datum;
+                NewTR.id = ID;
+
+                let NewTH1 = document.createElement("th");
+                NewTH1.textContent = name;
+
+                let NewTH2 = document.createElement("th");
+                NewTH2.textContent = datum;
+
+                let NewTH3 = document.createElement("th");
+
+                let deleteBtn = document.createElement("button");
+                deleteBtn.className = "btn btn-delete";
+                deleteBtn.innerHTML = `<span class="mdi mdi-delete"></span> <span>Delete</span>`;
+                deleteBtn.onclick = function () {
+                    if (LogedIn == true) {
+                        NewTR.remove();
+                        DeleteEvent(ID);
+                    } else {
+                        alert("No permission to delete event");
+                    }
+                };
+
+                NewTH3.appendChild(deleteBtn);
+
+                NewTR.appendChild(NewTH1);
+                NewTR.appendChild(NewTH2);
+                NewTR.appendChild(NewTH3);
+                document.getElementById("TableTest").appendChild(NewTR);
+                sortiereNachNaechstemDatumfürTest();
+            });
+        }
+        function LoadTasksIntoTablefromDatabase() {
+            arrTask.forEach(eintrag => {
+                // Example eintrag: "Asdf1232025-08-30: Datum:2025-08-30, Name:Asdf123"
+                const datumMatch = eintrag.match(/Datum:([0-9\-]+)/);
+                const nameMatch = eintrag.match(/Name:([^,]+)/);
+
+                const datum = datumMatch ? datumMatch[1].trim() : "";
+                const name = nameMatch ? nameMatch[1].trim() : "";
+
+                let NewTR = document.createElement("tr");
+                let ID = name + datum;
+                NewTR.id = ID;
+
+                let NewTH1 = document.createElement("th");
+                NewTH1.textContent = name;
+
+                let NewTH2 = document.createElement("th");
+                NewTH2.textContent = datum;
+
+                let NewTH3 = document.createElement("th");
+
+                let deleteBtn = document.createElement("button");
+                deleteBtn.className = "btn btn-delete";
+                deleteBtn.innerHTML = `<span class="mdi mdi-delete"></span> <span>Delete</span>`;
+                deleteBtn.onclick = function () {
+                    if (LogedIn == true) {
+                        NewTR.remove();
+                        DeleteEvent(ID);
+                    } else {
+                        alert("No permission to delete event");
+                    }
+                };
+
+                NewTH3.appendChild(deleteBtn);
+
+                NewTR.appendChild(NewTH1);
+                NewTR.appendChild(NewTH2);
+                NewTR.appendChild(NewTH3);
+                document.getElementById("TableTask").appendChild(NewTR);
+                sortiereNachNaechstemDatumfürTest();
+            });
+        }
+    </script>
+    <script src="Funktions.js"></script>
+
+</body>
+
+</html>

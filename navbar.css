@@ -23,6 +23,7 @@
     color: black;
     text-align: center;
     background-color: rgb(225, 225, 225);
+    user-select: none;
 }
 
 .navBarItem:hover {
@@ -59,5 +60,17 @@ footer a{
 .adminField{
     z-index: 1000;
     position: absolute;
-    top: 50%;
+    width: 250px;
+    top: 60px;
+    border: 3px black solid;
+    padding: 20px;
+    border-radius: 0 0 10px 10px;
+    position: fixed;
+    right: 5px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 10px;
+    background-color: white;
+    height: auto;
 }

@@ -6,44 +6,68 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>School</title>
     <link rel="stylesheet" href="navbar.css">
-    <style></style>
+    <style>
+        .Body {
+            display: flex;
+            position: fixed;
+            top: 60px;
+            left: 0;
+            width: 100%;
+            height: 85%;
+            justify-content: space-between;
+        }
+
+        .ItemContainer{
+            width: 50%;
+            height: 100%;
+            border: 3px black solid;
+            border-radius: 10px;
+            margin: 20px;
+            text-align: center;
+            padding: 5px;
+        }
+
+        .ItemContainer a{
+            font-size: 1.6em;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+    </style>
 </head>
 
 <body>
     <nav class="navBar">
-        <a href="" class="navBarItem active">Home</a>
-
-        <a href="" class="navBarItem">Wirtschaft & Recht</a>
-        <a href="" class="navBarItem">Deutsch</a>
-        <a href="" class="navBarItem">Französisch</a>
-        <a href="" class="navBarItem">Sport</a>
-        <a href="" class="navBarItem">Mathe</a>
-
-
-        <a href="" class="navBarItem">Modul morgen</a>
-        <a href="" class="navBarItem">Modul nachmittag</a>
-
-
-        <a href="" class="navBarItem">Tests</a>
+        <a href="index.html" class="navBarItem active">Home</a>
+        <!--BM-->
+        <a href="WirtschaftRechte.html" class="navBarItem">Wirtschaft & Recht</a>
+        <a href="Deutsch.html" class="navBarItem">Deutsch</a>
+        <a href="Französisch.html" class="navBarItem">Französisch</a>
+        <a href="Sport.html" class="navBarItem">Sport</a>
+        <a href="Mathe.html" class="navBarItem">Mathe</a>
+        <!--Berufsschule-->
+        <a href="ModulVormittag.html" class="navBarItem">Modul morgen</a>
+        <a href="ModulNachmittag.html" class="navBarItem">Modul nachmittag</a>
 
         <a onclick="showAdminField()" class="adminLogin navBarItem">@</a>
     </nav>
     <div class="adminField hide" id="adminFieldID">
-        <p>Test</p>
-        <input type="text">
-        <button>Submit</button>
+        <input type="text" id="PasswortInput" placeholder="Adminpasswort:">
+        <button onclick="SubmitAdminPasswort()">Submit</button>
+        <input type="text" id="EventName" placeholder="Eventname:">
+        <select name="TypeOfNewEvent" id="eventTyp" title="EventType">
+            <option value="Test">Test</option>
+            <option value="Husi">Hausaufgaben</option>
+        </select>
+        <input type="date" id="EventDate" placeholder="Datum">
+        <button onclick="getEventPropertys()">Create Event</button>
     </div>
+    
     <footer>
         <a>Bei Fehler: e272897@sbl.ch oder e224719@sbl.ch</a>
     </footer>
 
     <script>
-        function showAdminField(){
-            const adminField = document.getElementById("adminFieldID");
-            adminField.classList.toggle("hide");
-
-        }
+        
     </script>
+    <script src="Funktions.js"></script>
 </body>
-
 </html>
