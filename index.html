@@ -26,11 +26,24 @@
 
         <a href="" class="navBarItem">Tests</a>
 
-        <a href="" class="adminLogin navBarItem">@</a>
+        <a onclick="showAdminField()" class="adminLogin navBarItem">@</a>
     </nav>
+    <div class="adminField hide" id="adminFieldID">
+        <p>Test</p>
+        <input type="text">
+        <button>Submit</button>
+    </div>
     <footer>
         <a>Bei Fehler: e272897@sbl.ch oder e224719@sbl.ch</a>
     </footer>
+
+    <script>
+        function showAdminField(){
+            const adminField = document.getElementById("adminFieldID");
+            adminField.classList.toggle("hide");
+
+        }
+    </script>
 </body>
 
 </html>
