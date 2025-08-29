@@ -94,7 +94,7 @@ u { text-underline-offset: 4px; }
     white-space: nowrap;
     font-weight: 600;
     letter-spacing: 0.2px;
-    transition: background .18s ease, color .18s ease, transform .08s ease;
+    transition: background .18s ease, color .18s ease, transform .08s ease, box-shadow .18s ease;
 }
 
 .navBarItem:hover {
@@ -104,6 +104,7 @@ u { text-underline-offset: 4px; }
 .navBarItem.active {
     background: color-mix(in oklab, var(--primary) 18%, transparent);
     color: var(--primary-ink);
+    box-shadow: 0 2px 0 0 color-mix(in oklab, var(--primary) 35%, transparent) inset;
 }
 
 .adminLogin.navBarItem {
@@ -171,7 +172,6 @@ u { text-underline-offset: 4px; }
 
 /* ---------- Main Layout ---------- */
 .Body {
-    /* replaces inline styles in index.html */
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 22px;
@@ -231,9 +231,24 @@ u { text-underline-offset: 4px; }
     background: color-mix(in oklab, var(--muted) 55%, transparent);
 }
 
+/* Zebra rows for better scanability */
+#TableTest tr:nth-child(even):not(.Zeile) th,
+#TableTask tr:nth-child(even):not(.Zeile) th {
+    background: color-mix(in oklab, var(--muted) 35%, transparent);
+}
+
 #TableTest th:nth-child(1), #TableTask th:nth-child(1) { width: 50%; }
 #TableTest th:nth-child(2), #TableTask th:nth-child(2) { width: 25%; }
 #TableTest th:nth-child(3), #TableTask th:nth-child(3) { width: 25%; }
+
+/* Empty state cell */
+.table-empty {
+    text-align: center;
+    font-weight: 500;
+    font-style: italic;
+    color: color-mix(in oklab, var(--text) 60%, transparent);
+    padding: 16px 10px;
+}
 
 /* ---------- Buttons ---------- */
 .btn {

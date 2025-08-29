@@ -5,6 +5,7 @@ function SubmitAdminPasswort() {
     let InputPasswort = document.getElementById("PasswortInput").value;
     if (InputPasswort == Passwort) {
         LogedIn = true;
+        document.getElementById("PasswortInput").value = "";
         showAdminField();
     } else {
         alert("Wrong Password");
@@ -21,7 +22,10 @@ function getEventPropertys() {
         const eventType = document.getElementById("eventTyp").value;
         const eventName = document.getElementById("EventName").value;
         const eventDate = document.getElementById("EventDate").value;
-        console.log(eventType);
+        if (!eventName || !eventDate) {
+            alert("Bitte Name und Datum ausfuellen.");
+            return;
+        }
         if (eventType === "Test") {
             createTest(eventName, eventDate);
         } else if (eventType === "Husi") {
@@ -32,17 +36,84 @@ function getEventPropertys() {
     }
 }
 
+// --- UI helpers ---
+window.formatDateCH = function(iso) {
+    if (!iso || !/^\d{4}-\d{2}-\d{2}$/.test(iso)) return iso || "";
+    const [y, m, d] = iso.split("-");
+    return `${d}.${m}.${y}`;
+};
+
+window.ensureTableHeader = function(tableId) {
+    const table = document.getElementById(tableId);
+    if (!table) return;
+    table.innerHTML = "";
+    const headRow = document.createElement("tr");
+    headRow.className = "Zeile";
+    const th1 = document.createElement("th"); th1.textContent = "Aufgabe";
+    const th2 = document.createElement("th"); th2.textContent = "Bis wann";
+    const th3 = document.createElement("th"); th3.textContent = "Loeschen";
+    headRow.appendChild(th1); headRow.appendChild(th2); headRow.appendChild(th3);
+    table.appendChild(headRow);
+};
+
+window.updateEmptyState = function(tableId) {
+    const table = document.getElementById(tableId);
+    if (!table) return;
+    const hasRows = table.rows.length > 1; // header + rows
+    const existing = table.querySelector(".table-empty");
+    if (!hasRows && !existing) {
+        const row = document.createElement("tr");
+        const cell = document.createElement("th");
+        cell.className = "table-empty";
+        cell.colSpan = 3;
+        cell.textContent = "Keine Eintraege – @ fuer Admin-Feld.";
+        row.appendChild(cell);
+        table.appendChild(row);
+    } else if (hasRows && existing) {
+        existing.parentElement.remove();
+    }
+};
+
+window.sortiereNachNaechstemDatum = function(tableId) {
+    const heute = new Date();
+    const table = document.getElementById(tableId);
+    if (!table) return;
+    const header = table.rows[0];
+    const rows = Array.from(table.rows).slice(1).filter(r => !r.querySelector(".table-empty"));
+
+    rows.sort((a, b) => {
+        const da = new Date(a.dataset.date || a.cells[1].textContent.trim());
+        const db = new Date(b.dataset.date || b.cells[1].textContent.trim());
+        const diffA = Math.abs(da - heute);
+        const diffB = Math.abs(db - heute);
+        return diffA - diffB;
+    });
+
+    table.innerHTML = "";
+    table.appendChild(header);
+    rows.forEach(row => table.appendChild(row));
+    window.updateEmptyState(tableId);
+};
+
 function createTest(Name, datum) {
-    
+    const tableId = "TableTest";
+    const table = document.getElementById(tableId);
+    window.ensureTableHeader(tableId);
+
     let NewTR = document.createElement("tr");
     let ID = Name + datum;
+    if (document.getElementById(ID)) {
+        alert("Eintrag existiert bereits.");
+        return;
+    }
     NewTR.id = ID;
+    NewTR.dataset.date = datum;
 
     let NewTH1 = document.createElement("th");
     NewTH1.textContent = Name;
 
     let NewTH2 = document.createElement("th");
-    NewTH2.textContent = datum;
+    NewTH2.textContent = window.formatDateCH(datum);
 
     let NewTH3 = document.createElement("th");
 
@@ -53,6 +124,7 @@ function createTest(Name, datum) {
         if (LogedIn == true) {
             NewTR.remove();
             RemoveTest(ID);
+            window.updateEmptyState(tableId);
         } else {
             alert("No permission to delete event");
         }
@@ -63,22 +135,31 @@ function createTest(Name, datum) {
     NewTR.appendChild(NewTH1);
     NewTR.appendChild(NewTH2);
     NewTR.appendChild(NewTH3);
-    document.getElementById("TableTest").appendChild(NewTR);
-    sortiereNachNaechstemDatumfürTest();
+    table.appendChild(NewTR);
+    window.sortiereNachNaechstemDatum(tableId);
 
     uploadTestToFirebase(ID, Name, datum);
 }
 
 function createTask(Name, datum) {
+    const tableId = "TableTask";
+    const table = document.getElementById(tableId);
+    window.ensureTableHeader(tableId);
+
     let NewTR = document.createElement("tr");
     let ID = Name + datum;
+    if (document.getElementById(ID)) {
+        alert("Eintrag existiert bereits.");
+        return;
+    }
     NewTR.id = ID;
+    NewTR.dataset.date = datum;
 
     let NewTH1 = document.createElement("th");
     NewTH1.textContent = Name;
 
     let NewTH2 = document.createElement("th");
-    NewTH2.textContent = datum;
+    NewTH2.textContent = window.formatDateCH(datum);
 
     let NewTH3 = document.createElement("th");
 
@@ -89,6 +170,7 @@ function createTask(Name, datum) {
         if (LogedIn == true) {
             NewTR.remove();
             RemoveTask(ID);
+            window.updateEmptyState(tableId);
         } else {
             alert("No permission to delete event");
         }
@@ -99,35 +181,10 @@ function createTask(Name, datum) {
     NewTR.appendChild(NewTH1);
     NewTR.appendChild(NewTH2);
     NewTR.appendChild(NewTH3);
-    document.getElementById("TableTest").appendChild(NewTR);
-    sortiereNachNaechstemDatumfürTest();
+    table.appendChild(NewTR);
+    window.sortiereNachNaechstemDatum(tableId);
+
     uploadTaskToFirebase(ID, Name, datum);
-}
-
-function sortiereNachNaechstemDatumfürTest() {
-    const heute = new Date();
-    const table = document.getElementById("TableTest");
-    // Kopfzeile fixieren
-    const header = table.rows[0];
-
-    // Alle Zeilen ab der 2. sammeln
-    const rows = Array.from(table.rows).slice(1);
-
-    // Sortieren nach Datum (2. <th> = index 1)
-    rows.sort((a, b) => {
-        const dateA = new Date(a.cells[1].textContent.trim());
-        const dateB = new Date(b.cells[1].textContent.trim());
-
-        const diffA = Math.abs(dateA - heute);
-        const diffB = Math.abs(dateB - heute);
-
-        return diffA - diffB;
-    });
-
-    // Tabelle neu aufbauen
-    table.innerHTML = "";
-    table.appendChild(header);
-    rows.forEach(row => table.appendChild(row));
 }
 
 function manageNavBarActive(button = null, reload = false) {

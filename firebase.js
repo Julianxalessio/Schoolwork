@@ -25,34 +25,33 @@ window.getTests = function (){
     }
     const filesRef = ref(db, `${window.location.hash.slice(1)}/Test`);
     unsubscribeTests = onValue(filesRef, (snapshot) => {
-    const data = snapshot.val(); // Daten von Firebase
+        const data = snapshot.val();
         const table = document.getElementById("TableTest");
-        if (table) table.innerHTML = "";
+        if (table) window.ensureTableHeader("TableTest");
         arr = [];
-    if (!data) {
-        console.log("Keine Daten vorhanden");
-        return; // Abbruch, falls snapshot leer ist
-    }
-    arr = Object.entries(data).map(([titel, daten]) => {
-        if (!daten) return `${titel}: keine Daten`; 
-        const datenString = Object.entries(daten)
-            .map(([key, value]) => `${key}:${value}`)
-            .join(", ");
-        return `${titel}: ${datenString}`;
+        if (!data) {
+            if (window.updateEmptyState) window.updateEmptyState("TableTest");
+            return;
+        }
+        arr = Object.entries(data).map(([titel, daten]) => {
+            if (!daten) return `${titel}: keine Daten`;
+            const datenString = Object.entries(daten)
+                .map(([key, value]) => `${key}:${value}`)
+                .join(", ");
+            return `${titel}: ${datenString}`;
         });
         LoadEventsIntoTablefromDatabase();
     });
-    
 }
 
 window.uploadTestToFirebase = function (ID, Name, Datum){
     const dbRef = ref(db, `${window.location.hash.slice(1)}/Test/${ID}`);
-        set(dbRef, {
-            Datum: Datum,
-            Name: Name
-        }).catch((error) => {
-            console.error("Fehler beim Speichern:", error);
-        });
+    set(dbRef, {
+        Datum: Datum,
+        Name: Name
+    }).catch((error) => {
+        console.error("Fehler beim Speichern:", error);
+    });
 }
 
 window.getTasks = function (){
@@ -62,40 +61,37 @@ window.getTasks = function (){
     }
     const filesRef = ref(db, `${window.location.hash.slice(1)}/Task`);
     unsubscribeTasks = onValue(filesRef, (snapshot) => {
-    const data = snapshot.val(); // Daten von Firebase
+        const data = snapshot.val();
         const table = document.getElementById("TableTask");
-        if (table) table.innerHTML = "";
+        if (table) window.ensureTableHeader("TableTask");
         arrTask = [];
-    if (!data) {
-        console.log("Keine Daten vorhanden");
-        return; // Abbruch, falls snapshot leer ist
-    }
-    arrTask = Object.entries(data).map(([titel, daten]) => {
-        if (!daten) return `${titel}: keine Daten`; 
-        const datenString = Object.entries(daten)
-            .map(([key, value]) => `${key}:${value}`)
-            .join(", ");
-        return `${titel}: ${datenString}`;
+        if (!data) {
+            if (window.updateEmptyState) window.updateEmptyState("TableTask");
+            return;
+        }
+        arrTask = Object.entries(data).map(([titel, daten]) => {
+            if (!daten) return `${titel}: keine Daten`;
+            const datenString = Object.entries(daten)
+                .map(([key, value]) => `${key}:${value}`)
+                .join(", ");
+            return `${titel}: ${datenString}`;
         });
         LoadTasksIntoTablefromDatabase();
     });
-    
 }
 
 window.uploadTaskToFirebase = function (ID, Name, Datum){
     const dbRef = ref(db, `${window.location.hash.slice(1)}/Task/${ID}`);
-        set(dbRef, {
-            Datum: Datum,
-            Name: Name
-        }).catch((error) => {
-            console.error("Fehler beim Speichern:", error);
-        });
-        
+    set(dbRef, {
+        Datum: Datum,
+        Name: Name
+    }).catch((error) => {
+        console.error("Fehler beim Speichern:", error);
+    });
 }
 
 function LoadEventsIntoTablefromDatabase() {
     arr.forEach(eintrag => {
-        // Example eintrag: "Asdf1232025-08-30: Datum:2025-08-30, Name:Asdf123"
         const datumMatch = eintrag.match(/Datum:([0-9\-]+)/);
         const nameMatch = eintrag.match(/Name:([^,]+)/);
 
@@ -108,12 +104,13 @@ function LoadEventsIntoTablefromDatabase() {
             return;
         }
         NewTR.id = ID;
+        NewTR.dataset.date = datum;
 
         let NewTH1 = document.createElement("th");
         NewTH1.textContent = name;
 
         let NewTH2 = document.createElement("th");
-        NewTH2.textContent = datum;
+        NewTH2.textContent = window.formatDateCH ? window.formatDateCH(datum) : datum;
 
         let NewTH3 = document.createElement("th");
 
@@ -124,6 +121,7 @@ function LoadEventsIntoTablefromDatabase() {
             if (LogedIn == true) {
                 NewTR.remove();
                 RemoveTest(ID);
+                if (window.updateEmptyState) window.updateEmptyState("TableTest");
             } else {
                 alert("No permission to delete event");
             }
@@ -135,13 +133,12 @@ function LoadEventsIntoTablefromDatabase() {
         NewTR.appendChild(NewTH2);
         NewTR.appendChild(NewTH3);
         document.getElementById("TableTest").appendChild(NewTR);
-        sortiereNachNaechstemDatumfürTest();
     });
+    if (window.sortiereNachNaechstemDatum) window.sortiereNachNaechstemDatum("TableTest");
 }
 
 function LoadTasksIntoTablefromDatabase() {
     arrTask.forEach(eintrag => {
-        // Example eintrag: "Asdf1232025-08-30: Datum:2025-08-30, Name:Asdf123"
         const datumMatch = eintrag.match(/Datum:([0-9\-]+)/);
         const nameMatch = eintrag.match(/Name:([^,]+)/);
 
@@ -149,17 +146,18 @@ function LoadTasksIntoTablefromDatabase() {
         const name = nameMatch ? nameMatch[1].trim() : "";
 
         let NewTR = document.createElement("tr");
-        let ID = name + datum;  
+        let ID = name + datum;
         if (document.getElementById(ID)) {
             return;
         }
         NewTR.id = ID;
+        NewTR.dataset.date = datum;
 
         let NewTH1 = document.createElement("th");
         NewTH1.textContent = name;
 
         let NewTH2 = document.createElement("th");
-        NewTH2.textContent = datum;
+        NewTH2.textContent = window.formatDateCH ? window.formatDateCH(datum) : datum;
 
         let NewTH3 = document.createElement("th");
 
@@ -170,6 +168,7 @@ function LoadTasksIntoTablefromDatabase() {
             if (LogedIn == true) {
                 NewTR.remove();
                 RemoveTask(ID);
+                if (window.updateEmptyState) window.updateEmptyState("TableTask");
             } else {
                 alert("No permission to delete event");
             }
@@ -181,31 +180,31 @@ function LoadTasksIntoTablefromDatabase() {
         NewTR.appendChild(NewTH2);
         NewTR.appendChild(NewTH3);
         document.getElementById("TableTask").appendChild(NewTR);
-        sortiereNachNaechstemDatumfürTest();
     });
+    if (window.sortiereNachNaechstemDatum) window.sortiereNachNaechstemDatum("TableTask");
 }
 
 window.RemoveTest = function (ID){
-            let pathToDelete = `${window.location.hash.slice(1)}/Test/${ID}`
-            remove(ref(db, pathToDelete))
-            .then(() => {
-                console.log("Daten erfolgreich gelöscht.");
-            })
-            .catch((error) => {
-                console.error("Fehler beim Löschen:", error);
-            })
-        }
+    let pathToDelete = `${window.location.hash.slice(1)}/Test/${ID}`
+    remove(ref(db, pathToDelete))
+    .then(() => {
+        console.log("Daten erfolgreich geloescht.");
+    })
+    .catch((error) => {
+        console.error("Fehler beim Loeschen:", error);
+    })
+}
 
 window.RemoveTask = function (ID){
-            let pathToDelete = `${window.location.hash.slice(1)}/Task/${ID}`
-            remove(ref(db, pathToDelete))
-            .then(() => {
-                console.log("Daten erfolgreich gelöscht.");
-            })
-            .catch((error) => {
-                console.error("Fehler beim Löschen:", error);
-            })
-        }
+    let pathToDelete = `${window.location.hash.slice(1)}/Task/${ID}`
+    remove(ref(db, pathToDelete))
+    .then(() => {
+        console.log("Daten erfolgreich geloescht.");
+    })
+    .catch((error) => {
+        console.error("Fehler beim Loeschen:", error);
+    })
+}
 
 getTasks();
 getTests();
