@@ -11,7 +11,20 @@
 </head>
 
 <body>
-    <nav class="navBar"></nav>
+    <nav class="navBar">
+        <a onclick="manageNavBarActive(this, true)" href="#Home" class="navBarItem">Home</a>
+        <!--BM-->
+        <a onclick="manageNavBarActive(this, true)" href="#WirtschaftRecht" class="navBarItem">Wirtschaft & Recht</a>
+        <a onclick="manageNavBarActive(this, true)" href="#Deutsch" class="navBarItem">Deutsch</a>
+        <a onclick="manageNavBarActive(this, true)" href="#Französisch" class="navBarItem">Französisch</a>
+        <a onclick="manageNavBarActive(this, true)" href="#Sport" class="navBarItem">Sport</a>
+        <a onclick="manageNavBarActive(this, true)" href="#Mathe" class="navBarItem">Mathe</a>
+        <!--Berufsschule-->
+        <a onclick="manageNavBarActive(this, true)" href="#ModulMorgen" class="navBarItem">Modul morgen</a>
+        <a onclick="manageNavBarActive(this, true)" href="#ModulNachmittag" class="navBarItem">Modul nachmittag</a>
+
+        <a onclick="showAdminField()" class="adminLogin navBarItem" aria-label="Admin"><span class="mdi mdi-shield-account"></span>&nbsp;Admin</a>
+    </nav>
 
     <div class="Body">
         <div class="ItemContainer">
@@ -36,7 +49,17 @@
         </div>
     </div>
 
-    <div class="adminField hide"></div>
+    <div class="adminField hide">
+        <input type="text" id="PasswortInput" placeholder="Adminpasswort:">
+        <button onclick="SubmitAdminPasswort()">Submit</button>
+        <input type="text" id="EventName" placeholder="Eventname:">
+        <select name="TypeOfNewEvent" id="eventTyp" title="EventType">
+            <option value="Test">Test</option>
+            <option value="Husi">Hausaufgaben</option>
+        </select>
+        <input type="date" id="EventDate" placeholder="Datum">
+        <button onclick="getEventPropertys()">Create Event</button>
+    </div>
 
     <footer>
         <small>Schoolwork · made for you</small>
