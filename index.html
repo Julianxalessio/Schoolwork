@@ -23,8 +23,19 @@
         <a onclick="manageNavBarActive(this, true)" href="#ModulMorgen" class="navBarItem">Modul morgen</a>
         <a onclick="manageNavBarActive(this, true)" href="#ModulNachmittag" class="navBarItem">Modul nachmittag</a>
 
-        <a onclick="showAdminField()" class="adminLogin navBarItem" aria-label="Admin"><span class="mdi mdi-shield-account"></span>&nbsp;Admin</a>
+        <a onclick="toggleAuth()" id="authBtn" class="adminLogin navBarItem" aria-label="Login"><span class="mdi mdi-login"></span>&nbsp;<span class="auth-label">Login</span></a>
     </nav>
+
+    <div id="authPanel" class="authPanel hide">
+        <input type="email" id="authEmail" placeholder="E-Mail" />
+        <input type="password" id="authPassword" placeholder="Passwort" />
+        <div class="authActions">
+            <button class="btn" onclick="authLogin()">Login</button>
+            <button class="btn" onclick="authRegister()">Registrieren</button>
+            <button class="btn" onclick="toggleAuth()">Schliessen</button>
+        </div>
+        <small class="mono">Firebase Email/Password Auth</small>
+    </div>
 
     <div class="Body">
         <div class="ItemContainer">
@@ -50,8 +61,6 @@
     </div>
 
     <div class="adminField hide">
-        <input type="text" id="PasswortInput" placeholder="Adminpasswort:">
-        <button onclick="SubmitAdminPasswort()">Submit</button>
         <input type="text" id="EventName" placeholder="Eventname:">
         <select name="TypeOfNewEvent" id="eventTyp" title="EventType">
             <option value="Test">Test</option>
@@ -64,6 +73,10 @@
     <footer>
         <small>Schoolwork</small>
     </footer>
+
+    <script>
+        
+    </script>
 
     <script src="script.js"></script>
     <script src="firebase.js" type="module"></script>

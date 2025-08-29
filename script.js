@@ -1,24 +1,8 @@
-const Passwort = "Tester";
-let LogedIn = false;
-
-function SubmitAdminPasswort() {
-    let InputPasswort = document.getElementById("PasswortInput").value;
-    if (InputPasswort == Passwort) {
-        LogedIn = true;
-        document.getElementById("PasswortInput").value = "";
-        showAdminField();
-    } else {
-        alert("Wrong Password");
-    }
-};
-
-function showAdminField() {
-    const adminField = document.querySelector(".adminField");
-    adminField.classList.toggle("hide");
-};
+let LogedIn = false; // this will be kept in sync by firebase.js
+window.IsAdmin = window.IsAdmin || false;
 
 function getEventPropertys() {
-    if (LogedIn == true) {
+    if (window.IsAdmin === true) {
         const eventType = document.getElementById("eventTyp").value; // "Test" or "Husi"
         const eventName = document.getElementById("EventName").value;
         const eventDate = document.getElementById("EventDate").value; // ISO yyyy-mm-dd
@@ -29,7 +13,7 @@ function getEventPropertys() {
         const kind = (eventType === "Test") ? "Test" : "Task"; // map Husi -> Task
         createEvent(eventName, eventDate, kind);
     } else {
-        alert("Admin not loged in");
+        alert("Nur Admins duerfen Events erstellen.");
     }
 }
 
@@ -105,20 +89,25 @@ function resetTables(){
     }
 }
 
-function createEvent(Name, datum, kind) {
+async function createEvent(Name, datum, kind) {
     const tableId = (kind === "Test") ? "TableTest" : "TableTask";
     let table = document.getElementById(tableId);
     window.ensureTableHeader(tableId);
 
     let NewTR = document.createElement("tr");
     let ID = Name + datum + kind;
-    if (document.getElementById(ID)) {
-        alert("Eintrag existiert bereits.");
-        return;
-    }
-    NewTR.id = ID;
     NewTR.dataset.date = datum;
 
+    // Persist first to get the exact Firebase key (handles encoding/suffix to avoid overwrite)
+    const usedKey = await uploadToFirebase(ID, Name, datum, kind);
+
+    // Avoid duplicating the same row if it is already present
+    if (document.getElementById(usedKey)) {
+        // Already rendered by realtime listener; nothing to add
+        return;
+    }
+
+    NewTR.id = usedKey;
     NewTR.innerHTML = `
         <th>${Name}</th>
         <th>${window.formatDateCH(datum)}</th>
@@ -131,9 +120,9 @@ function createEvent(Name, datum, kind) {
 
     const deleteBtn = NewTR.querySelector("button.btn-delete");
     deleteBtn.onclick = function () {
-        if (LogedIn == true) {
+        if (window.IsAdmin === true) {
             NewTR.remove();
-            RemoveEvent(ID, kind);
+            RemoveEvent(usedKey, kind);
             window.updateEmptyState(tableId);
         } else {
             alert("No permission to delete event");
@@ -141,8 +130,6 @@ function createEvent(Name, datum, kind) {
     };
 
     window.sortiereNachNaechstemDatum(tableId);
-
-    uploadToFirebase(ID, Name, datum, kind);
 }
 
 function manageNavBarActive(button = null, reload = false) {

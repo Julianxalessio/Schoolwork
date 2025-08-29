@@ -208,6 +208,7 @@ u { text-underline-offset: 4px; }
     width: 100%;
     border-collapse: collapse;
     table-layout: fixed;
+    
 }
 
 .tableKind .Zeile th, .Zeile th {
@@ -296,4 +297,34 @@ footer a { opacity: .8; }
 .adminField select:focus-visible {
     outline: 2px solid color-mix(in oklab, var(--primary) 60%, transparent);
     outline-offset: 2px;
+}
+
+/* ---------- Auth Panel ---------- */
+.authPanel {
+    position: sticky;
+    top: var(--nav-h);
+    display: grid;
+    grid-template-columns: 1fr 1fr auto;
+    gap: 10px;
+    align-items: center;
+    padding: 12px;
+    margin: 8px auto;
+    width: min(1100px, 96%);
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    z-index: 49;
+}
+.authPanel input[type="email"], .authPanel input[type="password"] {
+    height: 40px;
+    padding: 0 12px;
+    background: var(--bg);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+}
+.authPanel .authActions { display: flex; gap: 8px; }
+@media (max-width: 860px) {
+    .authPanel { grid-template-columns: 1fr; }
 }
