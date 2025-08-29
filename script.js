@@ -21,9 +21,10 @@ function getEventPropertys() {
         const eventType = document.getElementById("eventTyp").value;
         const eventName = document.getElementById("EventName").value;
         const eventDate = document.getElementById("EventDate").value;
+        console.log(eventType);
         if (eventType === "Test") {
             createTest(eventName, eventDate);
-        } else if (eventType === "Hausaufgaben") {
+        } else if (eventType === "Husi") {
             createTask(eventName, eventDate);
         }
     } else {
@@ -51,7 +52,7 @@ function createTest(Name, datum) {
     deleteBtn.onclick = function () {
         if (LogedIn == true) {
             NewTR.remove();
-            DeleteEvent(ID);
+            RemoveTest(ID);
         } else {
             alert("No permission to delete event");
         }
@@ -87,7 +88,7 @@ function createTask(Name, datum) {
     deleteBtn.onclick = function () {
         if (LogedIn == true) {
             NewTR.remove();
-            DeleteEvent(ID);
+            RemoveTask(ID);
         } else {
             alert("No permission to delete event");
         }
@@ -128,3 +129,24 @@ function sortiereNachNaechstemDatumfürTest() {
     table.appendChild(header);
     rows.forEach(row => table.appendChild(row));
 }
+
+function manageNavBarActive(button = null, reload = false) {
+    const navItems = document.querySelectorAll(".navBarItem");
+    const hash = window.location.hash;
+
+    navItems.forEach(item => {
+        const isActive = button ? (item === button) : (item.getAttribute("href") === hash);
+        item.classList.toggle("active", isActive);
+    });
+
+    if (reload) {
+        const targetHash = button ? button.getAttribute("href") : hash;
+        if (targetHash && window.location.hash !== targetHash) {
+            window.location.hash = targetHash;
+        } else {
+            window.location.reload();
+        }
+    }
+}
+
+document.addEventListener("DOMContentLoaded", () => manageNavBarActive(null, false));

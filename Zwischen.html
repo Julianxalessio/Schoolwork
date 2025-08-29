@@ -46,31 +46,8 @@
 </head>
 
 <body>
-    <nav class="navBar">
-        <a href="index.html" class="navBarItem">Home</a>
-        <!--BM-->
-        <a href="WirtschaftRechte.html" class="navBarItem active">Wirtschaft & Recht</a>
-        <a href="Deutsch.html" class="navBarItem">Deutsch</a>
-        <a href="Französisch.html" class="navBarItem">Französisch</a>
-        <a href="Sport.html" class="navBarItem">Sport</a>
-        <a href="Mathe.html" class="navBarItem">Mathe</a>
-        <!--Berufsschule-->
-        <a href="ModulVormittag.html" class="navBarItem">Modul morgen</a>
-        <a href="ModulNachmittag.html" class="navBarItem">Modul nachmittag</a>
-
-        <a onclick="showAdminField()" class="adminLogin navBarItem">@</a>
-    </nav>
-    <div class="adminField hide" id="adminFieldID">
-        <input type="text" id="PasswortInput" placeholder="Adminpasswort:">
-        <button onclick="SubmitAdminPasswort()">Submit</button>
-        <input type="text" id="EventName" placeholder="Eventname:">
-        <select name="TypeOfNewEvent" id="eventTyp" title="EventType">
-            <option value="Test">Test</option>
-            <option value="Husi">Hausaufgaben</option>
-        </select>
-        <input type="date" id="EventDate" placeholder="Datum">
-        <button onclick="getEventPropertys()">Create Event</button>
-    </div>
+    <nav class="navBar"></nav>
+    <div class="adminField hide" id="adminFieldID"></div>
     <div class="Body">
         <div class="ItemContainer">
             <a><u>Test</u></a>
@@ -100,90 +77,11 @@
     </footer>
     <script src="SortTable.js"></script>
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-        import { getDatabase, ref, set, get, child, remove, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
-        const firebaseConfig = {
-            apiKey: "AIzaSyA1f1LlbGrevYqPojOGjFZZFeSCg_TiPYI",
-            authDomain: "classroom-26016.firebaseapp.com",
-            databaseURL: "https://classroom-26016-default-rtdb.firebaseio.com",
-            projectId: "classroom-26016",
-            storageBucket: "classroom-26016.firebasestorage.app",
-            messagingSenderId: "494692974948",
-            appId: "1:494692974948:web:39458c2d78189f2a34fa71",
-            measurementId: "G-JM2KZCLH3W"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
-
-        window.getTests = function (){
-            const db = getDatabase();
-            const filesRef = ref(db, `WirtschaftRecht/Test`);
-            onValue(filesRef, (snapshot) => {
-            const data = snapshot.val(); // Daten von Firebase
-            if (!data) {
-                console.log("Keine Daten vorhanden");
-                return; // Abbruch, falls snapshot leer ist
-            }
-            arr = Object.entries(data).map(([titel, daten]) => {
-                if (!daten) return `${titel}: keine Daten`; 
-                const datenString = Object.entries(daten)
-                    .map(([key, value]) => `${key}:${value}`)
-                    .join(", ");
-                return `${titel}: ${datenString}`;
-                });
-                LoadEventsIntoTablefromDatabase();
-            });
-            
-        }
-        window.uploadTestToFirebase = function (ID, Name, Datum){
-            const dbRef = ref(db, `WirtschaftRecht/Test/${ID}`);
-                set(dbRef, {
-                    Datum: Datum,
-                    Name: Name
-                }).catch((error) => {
-                    console.error("Fehler beim Speichern:", error);
-                });
-        }
-
-        window.getTasks = function (){
-            const db = getDatabase();
-            const filesRef = ref(db, `WirtschaftRecht/Task`);
-            onValue(filesRef, (snapshot) => {
-            const data = snapshot.val(); // Daten von Firebase
-            if (!data) {
-                console.log("Keine Daten vorhanden");
-                return; // Abbruch, falls snapshot leer ist
-            }
-            arrTask = Object.entries(data).map(([titel, daten]) => {
-                if (!daten) return `${titel}: keine Daten`; 
-                const datenString = Object.entries(daten)
-                    .map(([key, value]) => `${key}:${value}`)
-                    .join(", ");
-                return `${titel}: ${datenString}`;
-                });
-                LoadTasksIntoTablefromDatabase();
-            });
-            
-        }
-        window.uploadTaskToFirebase = function (ID, Name, Datum){
-            const dbRef = ref(db, `WirtschaftRecht/Task/${ID}`);
-                set(dbRef, {
-                    Datum: Datum,
-                    Name: Name
-                }).catch((error) => {
-                    console.error("Fehler beim Speichern:", error);
-                });
-                
-        }
-        getTasks();
-        getTests();
+        
     </script>
     <script>
-        
         let arr;
         let arrTask;
-
         function LoadEventsIntoTablefromDatabase() {
             arr.forEach(eintrag => {
                 // Example eintrag: "Asdf1232025-08-30: Datum:2025-08-30, Name:Asdf123"
@@ -269,7 +167,8 @@
             });
         }
     </script>
-    <script src="Funktions.js"></script>
+    <script src="public.js"></script>
+    <script src="script.js"></script>
 
 </body>
 

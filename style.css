@@ -1,98 +1,288 @@
-.btn-delete {
-    font-size: 1em;
-    color: red;
-    background: white;
-    border: 1px solid #ccc;
-    border-radius: 20px;
-    padding: 4px 16px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    cursor: pointer;
+/*
+    Clean CSS for "Schoolwork"
+    - Modern, minimal, responsive
+    - Light/Dark via prefers-color-scheme
+    - Works with existing HTML classes/IDs
+    NOTE: Remove the inline <style> block in index.html so this file takes effect.
+*/
+
+/* ---------- CSS Reset / Base ---------- */
+* {
+    box-sizing: border-box;
 }
 
-.btn-delete .mdi {
-    color: red;
-    font-size: 22px;
+html {
+    color-scheme: light dark;
 }
 
-.btn-delete:hover {
-    box-shadow: 0 0 0 4px #ffcccc;
+:root {
+    --bg: #f7f7f8;
+    --card: #ffffff;
+    --text: #0f1222;
+    --muted: #e9e9ee;
+    --border: #d9d9e3;
+    --primary: #3b82f6; /* blue-500 */
+    --primary-ink: #0b3b91;
+    --danger: #ef4444;
+    --shadow: 0 2px 10px rgba(0,0,0,.06);
+    --radius: 14px;
+    --nav-h: 60px;
 }
 
-.navBar{
-    position: fixed;
-    display: flex;
-    width: 100%;
-    height: auto;
-    background-color: black;
+@media (prefers-color-scheme: dark) {
+    :root {
+        --bg: #0b0d12;
+        --card: #12141b;
+        --text: #e8eaf2;
+        --muted: #1b1e27;
+        --border: #282c37;
+        --primary: #60a5fa; /* blue-400 */
+        --primary-ink: #b8d4ff;
+        --danger: #f87171;
+        --shadow: 0 8px 30px rgba(0,0,0,.35);
+    }
+}
+
+body {
     margin: 0;
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+    line-height: 1.45;
+    background: var(--bg);
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+    color: inherit;
+    text-decoration: none;
+}
+
+u { text-underline-offset: 4px; }
+
+/* Utility */
+.hide { display: none !important; }
+.mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+
+/* ---------- Top Navigation ---------- */
+.navBar {
+    position: fixed;
     top: 0;
     left: 0;
-    justify-content: space-between;
+    right: 0;
+    height: var(--nav-h);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 18px;
+    background: color-mix(in oklab, var(--card) 78%, transparent);
+    backdrop-filter: saturate(120%) blur(8px);
+    -webkit-backdrop-filter: saturate(120%) blur(8px);
+    border-bottom: 1px solid var(--border);
+    box-shadow: var(--shadow);
+    z-index: 50;
+    overflow-x: auto;
 }
 
-.navBarItem{
-    flex-grow: 1;
-    height: 40px;
-    border-radius: 5px;
-    border: 1px solid black;
-    margin: 5px 5px 5px 5px;
-    padding: 6px;
-    font-size: 1.4em;
-    font-family: Arial, Helvetica, sans-serif;
-    text-decoration: none;
-    color: black;
-    text-align: center;
-    background-color: rgb(225, 225, 225);
-    user-select: none;
+.navBarItem {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 36px;
+    padding: 0 12px;
+    border-radius: 10px;
+    white-space: nowrap;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+    transition: background .18s ease, color .18s ease, transform .08s ease;
 }
 
 .navBarItem:hover {
-    background-color: rgb(112, 112, 112);
+    background: var(--muted);
 }
 
 .navBarItem.active {
-    background-color: rgb(71, 71, 71);
-    color: white;
+    background: color-mix(in oklab, var(--primary) 18%, transparent);
+    color: var(--primary-ink);
 }
 
-footer{
-    position: absolute;
-    z-index: 1000;
-    bottom: 0;
-    left: 0;
-    background-color: black;
-    color: white;
-    width: 100%;
-    padding-left: 10px;
-    height: 25px;
+.adminLogin.navBarItem {
+    margin-left: auto;
+    border: 1px dashed var(--border);
 }
 
-footer a{
-    margin: 4px;
-    padding-top: 2px;
-    padding-bottom: 5px;
-}
-
-.hide{
-    display: none !important;
-}
-
-.adminField{
-    z-index: 1000;
-    position: absolute;
-    width: 250px;
-    top: 60px;
-    border: 3px black solid;
-    padding: 20px;
-    border-radius: 0 0 10px 10px;
-    position: fixed;
-    right: 5px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
+/* ---------- Admin Field Panel ---------- */
+.adminField {
+    position: sticky; /* sits under the nav */
+    top: var(--nav-h);
+    display: grid;
+    grid-template-columns: 1fr auto 1fr 1fr auto;
     gap: 10px;
-    background-color: white;
-    height: auto;
+    align-items: center;
+    padding: 14px;
+    margin: calc(var(--nav-h) + 8px) auto 8px;
+    width: min(1100px, 96%);
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+}
+
+.adminField input[type="text"],
+.adminField input[type="date"],
+.adminField select {
+    height: 40px;
+    padding: 0 12px;
+    background: var(--bg);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    outline: none;
+    transition: border-color .15s ease, box-shadow .15s ease;
+}
+
+.adminField input:focus,
+.adminField select:focus {
+    border-color: color-mix(in oklab, var(--primary) 45%, var(--border));
+    box-shadow: 0 0 0 3px color-mix(in oklab, var(--primary) 22%, transparent);
+}
+
+.adminField button {
+    height: 40px;
+    padding: 0 14px;
+    border-radius: 10px;
+    border: 1px solid color-mix(in oklab, var(--primary) 60%, var(--border));
+    background: color-mix(in oklab, var(--primary) 18%, var(--card));
+    color: var(--primary-ink);
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform .06s ease, filter .15s ease, background .15s ease;
+}
+
+.adminField button:hover { filter: brightness(1.02); }
+.adminField button:active { transform: translateY(1px); }
+
+@media (max-width: 860px) {
+    .adminField {
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+}
+
+/* ---------- Main Layout ---------- */
+.Body {
+    /* replaces inline styles in index.html */
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 22px;
+    padding: calc(var(--nav-h) + 18px) 18px 24px;
+    width: min(1200px, 100%);
+    margin: 0 auto;
+}
+
+@media (max-width: 960px) {
+    .Body {
+        grid-template-columns: 1fr;
+        padding-top: calc(var(--nav-h) + 14px);
+    }
+}
+
+.ItemContainer {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 14px;
+}
+
+.ItemContainer > a {
+    display: block;
+    font-size: 1.25rem;
+    font-weight: 800;
+    margin-bottom: 10px;
+}
+
+/* ---------- Tables ---------- */
+#TableTest,
+#TableTask {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+
+#TableTest .Zeile th,
+#TableTask .Zeile th {
+    text-align: left;
+    font-weight: 800;
+    padding: 12px 10px;
+    border-bottom: 2px solid var(--border);
+}
+
+#TableTest th,
+#TableTask th {
+    text-align: left;
+    font-weight: 600;
+    padding: 12px 10px;
+    border-bottom: 1px solid var(--border);
+}
+
+#TableTest tr:hover th,
+#TableTask tr:hover th {
+    background: color-mix(in oklab, var(--muted) 55%, transparent);
+}
+
+#TableTest th:nth-child(1), #TableTask th:nth-child(1) { width: 50%; }
+#TableTest th:nth-child(2), #TableTask th:nth-child(2) { width: 25%; }
+#TableTest th:nth-child(3), #TableTask th:nth-child(3) { width: 25%; }
+
+/* ---------- Buttons ---------- */
+.btn {
+    appearance: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    height: 36px;
+    padding: 0 12px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--text);
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform .06s ease, filter .15s ease, background .15s ease, border-color .15s ease;
+}
+
+.btn:hover {
+    filter: brightness(1.03);
+}
+
+.btn:active { transform: translateY(1px); }
+
+.btn-delete {
+    border-color: color-mix(in oklab, var(--danger) 60%, var(--border));
+    background: color-mix(in oklab, var(--danger) 14%, var(--card));
+    color: color-mix(in oklab, var(--danger) 70%, var(--text));
+}
+
+/* Material Design Icons inline alignment */
+.mdi { line-height: 0; font-size: 18px; }
+
+/* ---------- Footer ---------- */
+footer {
+    width: 100%;
+    padding: 18px;
+    color: color-mix(in oklab, var(--text) 70%, transparent);
+    text-align: center;
+}
+
+footer a { opacity: .8; }
+
+/* ---------- Nice Focus for Links ---------- */
+.navBarItem:focus-visible,
+.btn:focus-visible,
+.adminField button:focus-visible,
+.adminField input:focus-visible,
+.adminField select:focus-visible {
+    outline: 2px solid color-mix(in oklab, var(--primary) 60%, transparent);
+    outline-offset: 2px;
 }
