@@ -1,0 +1,285 @@
+/* Modern Task/Comment Styles – Light & Dark Mode, Readable */
+
+/* -----------------------
+   Variables (Light Mode)
+   ----------------------- */
+:root {
+  --page-bg: #f6f6f6;
+  --surface: #fff;
+  --muted-bg: #f3f3f3;
+  --accent-green: #d8f8d7;
+  --accent-green-border: #9fe0a8;
+  --text: #222;
+  --muted-text: #6b7280;
+  --border-color: #222;
+  --card-border: #222;
+  --radius: 12px;
+  --max-width: 80%;
+  --gap: 20px;
+  --focus: 2px solid #9fe0a8;
+  --shadow-1: 0 4px 24px rgba(0,0,0,0.07);
+  --shadow-2: 0 2px 8px rgba(0,0,0,0.04);
+  --muted-border: #bbb;
+  --transition-fast: 160ms ease;
+}
+
+/* -----------------------
+   Dark Mode
+   ----------------------- */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --page-bg: #161b22;
+    --surface: #22272e;
+    --muted-bg: #1e242c;
+    --accent-green: #2ea043;
+    --accent-green-border: #3fb950;
+    --text: #f0f6fc;
+    --muted-text: #8b949e;
+    --border-color: #30363d;
+    --card-border: #30363d;
+    --muted-border: #30363d;
+    --shadow-1: 0 4px 24px rgba(0,0,0,0.5);
+    --shadow-2: 0 2px 8px rgba(0,0,0,0.3);
+  }
+}
+
+/* -----------------------
+   Base Layout
+   ----------------------- */
+* { box-sizing: border-box; }
+html, body {
+  height: auto;
+  margin: 0;
+  font-family: Inter, "Segoe UI", Arial, sans-serif;
+  background: var(--page-bg);
+  color: var(--text);
+  transition: background 220ms var(--transition-fast), color 220ms var(--transition-fast);
+}
+
+.container {
+  max-width: var(--max-width);
+  margin: 40px auto;
+  padding: 24px;
+  background: var(--surface);
+  border: 3px solid var(--card-border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-1);
+  position: relative;
+}
+
+/* -----------------------
+   Task Info
+   ----------------------- */
+.task-info {
+  margin-bottom: var(--gap);
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 24px;
+  border: 2px solid var(--card-border);
+  box-shadow: var(--shadow-2);
+  overflow: hidden;
+}
+
+.task-info h2 {
+  margin: 0 0 10px 0;
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.task-info p {
+  margin: 8px 0;
+  color: var(--muted-text);
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+/* -----------------------
+   Comments Section
+   ----------------------- */
+.comments {
+  padding: 18px;
+  background: var(--muted-bg);
+  border: 2px solid var(--card-border);
+  border-radius: var(--radius);
+  margin-bottom: var(--gap);
+  overflow-y: auto;   /* Enable vertical scrolling */
+  overflow-x: hidden;
+  max-height: 450px;  /* Set your preferred height */
+}
+
+.comments h3 {
+  margin: 0 0 14px 0;
+  font-size: 1.2rem;
+  color: var(--text);
+}
+
+.comment {
+  background: var(--surface);
+  border: 1px solid var(--muted-border);
+  border-radius: 8px;
+  padding: 12px 14px;
+  margin-bottom: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+}
+
+.comment-author {
+  font-weight: 700;
+  margin-right: 8px;
+  color: var(--text);
+}
+
+.comment-date {
+  font-size: 0.95em;
+  color: var(--muted-text);
+  margin-right: 8px;
+}
+
+.comment p {
+  margin: 8px 0 0 0;
+  line-height: 1.5;
+  font-size: 1rem;
+  color: var(--text);
+  word-break: break-word;
+}
+
+/* -----------------------
+   Comment Input Section
+   ----------------------- */
+.comment-input {
+  padding: 16px;
+  border: 2px solid var(--card-border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+  overflow: hidden; /* <-- Added */
+}
+
+.input-comment {
+  flex: 1 1 400px;
+  min-width: 180px;
+  padding: 10px 12px;
+  border: 1.5px solid var(--muted-border);
+  border-radius: 6px;
+  font-size: 1rem;
+  background: var(--muted-bg);
+  color: var(--text);
+  transition: box-shadow var(--transition-fast), border-color var(--transition-fast);
+  resize: vertical;
+  min-height: 44px;
+  max-height: 180px;
+  line-height: 1.5;
+}
+
+.input-comment:focus {
+  border-color: var(--accent-green-border);
+  box-shadow: 0 0 0 2px var(--accent-green);
+  outline: none;
+}
+
+.input-comment::placeholder {
+  color: var(--muted-text);
+}
+
+.input-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex: 0 0 auto;
+}
+
+.upload-btn {
+  display: inline-block;
+  padding: 8px 14px;
+  border: 1.5px solid var(--muted-border);
+  border-radius: 6px;
+  background: var(--muted-bg);
+  color: var(--text);
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background var(--transition-fast), border-color var(--transition-fast);
+}
+
+.upload-btn:hover,
+.upload-btn:focus {
+  background: var(--accent-green);
+  border-color: var(--accent-green-border);
+}
+
+.send-btn {
+  padding: 8px 18px;
+  border-radius: 6px;
+  background: var(--accent-green);
+  border: 1.5px solid var(--accent-green-border);
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 1rem;
+  color: #222;
+  transition: background var(--transition-fast), border-color var(--transition-fast);
+}
+
+.send-btn:hover,
+.send-btn:focus {
+  background: var(--accent-green-border);
+  color: #fff;
+  border-color: var(--accent-green-border);
+}
+
+/* -----------------------
+   Close Button
+   ----------------------- */
+.close-btn {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  background: var(--surface);
+  color: var(--text);
+  border: 2px solid var(--card-border);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  font-size: 2rem;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: var(--shadow-2);
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.close-btn:hover,
+.close-btn:focus {
+  background: var(--accent-green);
+  color: #222;
+  border-color: var(--accent-green-border);
+}
+
+/* -----------------------
+   Responsive Design
+   ----------------------- */
+@media (max-width: 900px) {
+  :root { --max-width: 98vw; }
+  .container { padding: 12px; }
+  .task-info h2 { font-size: 1.4rem; }
+  .input-comment { flex-basis: 100%; }
+  .comment-input { flex-direction: column; align-items: stretch; gap: 10px; }
+  .input-actions { justify-content: space-between; width: 100%; }
+  .upload-btn, .send-btn { width: 48%; text-align: center; }
+}
+
+@media (max-width: 520px) {
+  .container { padding: 6px; }
+  .task-info h2 { font-size: 1.1rem; }
+  .comment p { font-size: 0.95rem; }
+}
+
+/* -----------------------
+   Utility Classes
+   ----------------------- */
+.small { font-size: 0.9rem; color: var(--muted-text); }
+.center { text-align: center; }

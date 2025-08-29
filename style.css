@@ -225,6 +225,10 @@ u { text-underline-offset: 4px; }
     border-bottom: 1px solid var(--border);
 }
 
+th {
+    cursor: pointer;
+}
+
 .tableKind tr:hover th, tr:hover th {
     background: color-mix(in oklab, var(--muted) 55%, transparent);
 }

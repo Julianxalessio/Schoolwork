@@ -18,26 +18,32 @@ function getEventPropertys() {
 }
 
 // --- UI helpers ---
-window.formatDateCH = function(iso) {
+window.formatDateCH = function (iso) {
     if (!iso || !/^\d{4}-\d{2}-\d{2}$/.test(iso)) return iso || "";
     const [y, m, d] = iso.split("-");
     return `${d}.${m}.${y}`;
 };
 
-window.ensureTableHeader = function(tableId) {
+window.ensureTableHeader = function (tableId) {
     const table = document.getElementById(tableId);
     if (!table) return;
     table.innerHTML = "";
     const headRow = document.createElement("tr");
     headRow.className = "Zeile";
-    const th1 = document.createElement("th"); th1.textContent = "Aufgabe";
-    const th2 = document.createElement("th"); th2.textContent = "Bis wann";
-    const th3 = document.createElement("th"); th3.textContent = "Löschen"; th3.classList.add("hide");
-    headRow.appendChild(th1); headRow.appendChild(th2); headRow.appendChild(th3);
+    const th1 = document.createElement("th");
+    th1.textContent = "Aufgabe";
+    const th2 = document.createElement("th");
+    th2.textContent = "Bis wann";
+    const th3 = document.createElement("th");
+    th3.textContent = "Löschen";
+    th3.classList.add("hide");
+    headRow.appendChild(th1);
+    headRow.appendChild(th2);
+    headRow.appendChild(th3);
     table.appendChild(headRow);
 };
 
-window.updateEmptyState = function(tableId) {
+window.updateEmptyState = function (tableId) {
     const table = document.getElementById(tableId);
     if (!table) return;
     const hasRows = table.rows.length > 1; // header + rows
@@ -45,7 +51,7 @@ window.updateEmptyState = function(tableId) {
     if (!hasRows && !existing) {
         const row = document.createElement("tr");
         const cell = document.createElement("th");
-        cell.classList.add ("table-empty", "hide");
+        cell.classList.add("table-empty", "hide");
         cell.colSpan = 3;
         cell.textContent = "Keine Eintraege";
         row.appendChild(cell);
@@ -55,7 +61,7 @@ window.updateEmptyState = function(tableId) {
     }
 };
 
-window.sortiereNachNaechstemDatum = function(tableId) {
+window.sortiereNachNaechstemDatum = function (tableId) {
     const heute = new Date();
     const table = document.getElementById(tableId);
     if (!table) return;
@@ -76,7 +82,7 @@ window.sortiereNachNaechstemDatum = function(tableId) {
     window.updateEmptyState(tableId);
 };
 
-function resetTables(){
+function resetTables() {
     const tableTest = document.getElementById("TableTest");
     const tableTask = document.getElementById("TableTask");
     if (tableTest) {
@@ -91,44 +97,49 @@ function resetTables(){
 
 async function createEvent(Name, datum, kind) {
     const tableId = (kind === "Test") ? "TableTest" : "TableTask";
-    let table = document.getElementById(tableId);
+    const table = document.getElementById(tableId);
     window.ensureTableHeader(tableId);
 
-    let NewTR = document.createElement("tr");
-    let ID = Name + datum + kind;
+    const NewTR = document.createElement("tr");
+    // ID shown to user can be different from the real DB key – prefer DB key for navigation
+    const Id = Name + datum + kind;
+
     NewTR.dataset.date = datum;
+    NewTR.classList.add('Zeile');
 
-    // Persist first to get the exact Firebase key (handles encoding/suffix to avoid overwrite)
-    const usedKey = await uploadToFirebase(ID, Name, datum, kind);
-
-    // Avoid duplicating the same row if it is already present
-    if (document.getElementById(usedKey)) {
-        // Already rendered by realtime listener; nothing to add
-        return;
-    }
-
-    NewTR.id = usedKey;
     NewTR.innerHTML = `
-        <th>${Name}</th>
-        <th>${window.formatDateCH(datum)}</th>
-        <th class="hide">
-            <button class="btn btn-delete">Delete</button>
-        </th>
+      <th>${Name}</th>
+      <th>${window.formatDateCH(datum)}</th>
+      <th class="hide">
+        <button class="btn btn-delete">Delete</button>
+      </th>
     `;
 
     table.appendChild(NewTR);
 
-    const deleteBtn = NewTR.querySelector("button.btn-delete");
-    deleteBtn.onclick = function () {
-        if (window.IsAdmin === true) {
-            NewTR.remove();
-            RemoveEvent(usedKey, kind);
-            window.updateEmptyState(tableId);
+    // ensure delete button does not trigger row click
+    const deleteBtn = NewTR.querySelector('.btn-delete');
+    if (deleteBtn) {
+      deleteBtn.addEventListener('click', (ev) => {
+        ev.stopPropagation();
+        if (window.IsAdmin) {
+          // your existing delete logic here (adjust function name if needed)
+          NewTR.remove();
+          RemoveEvent(Id, kind);
+          window.updateEmptyState(tableId);
         } else {
-            alert("No permission to delete event");
+          alert('No permission to delete event');
         }
-    };
+      });
+    }
 
+    // add event listener for row click – ignore clicks on controls inside the row
+    NewTR.addEventListener('click', (ev) => {
+      openEventSite(window.location.hash, Id); // use DB key if you have it instead
+    });
+
+    // visual affordance
+    NewTR.style.cursor = 'pointer';
     window.sortiereNachNaechstemDatum(tableId);
 }
 
@@ -151,3 +162,8 @@ function manageNavBarActive(button = null, reload = false) {
 }
 
 document.addEventListener("DOMContentLoaded", () => manageNavBarActive(null, false));
+
+function openEventSite(oldHash, Id){
+    console.log("Button pressed");
+    window.location.replace(window.location.origin + `/Item/?oldHash=${encodeURIComponent(oldHash)}&eventId=${encodeURIComponent(Id)}`);
+}

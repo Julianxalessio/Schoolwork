@@ -99,7 +99,13 @@ function updateAuthUI(isLoggedIn) {
     if (adminField) {
         adminField.classList.toggle('hide', !window.IsAdmin);
     }
-    if (panel) { 
+    if (window.IsAdmin) {
+        let lastThs = document.querySelectorAll("tr th:last-child");
+        lastThs.forEach(th => {
+            th.classList.toggle('hide', !window.IsAdmin);
+        });
+    }
+    if (panel) {
         panel.classList.toggle('hide', isLoggedIn || !panel.classList.contains('open'));
     }
 }
@@ -230,17 +236,38 @@ window.getEvent = function (kind) {
                     <button class="btn btn-delete">Delete</button>
                 </th>
             `;
+
+            if (window.IsAdmin) {
+                let lastThs = document.querySelectorAll("tr th:last-child");
+                lastThs.forEach(th => {
+                    th.classList.toggle('hide', false);
+                });
+            }
             table.appendChild(tr);
 
-            tr.querySelector(".btn-delete").onclick = () => {
-                if (window.IsAdmin === true) {
-                    tr.remove();
-                    window.RemoveEvent(id, kind);
-                    window.updateEmptyState(tableId);
-                } else {
-                    alert('Nur Admins duerfen Eintraege loeschen.');
-                }
-            };
+            const deleteBtn = tr.querySelector('.btn-delete');
+            if (deleteBtn) {
+                deleteBtn.addEventListener('click', (ev) => {
+                    ev.stopPropagation();
+                    if (window.IsAdmin) {
+                        // your existing delete logic here (adjust function name if needed)
+                        NewTR.remove();
+                        RemoveEvent(localId, kind);
+                        window.updateEmptyState(tableId);
+                    } else {
+                        alert('No permission to delete event');
+                    }
+                });
+            }
+
+            // add event listener for row click – ignore clicks on controls inside the row
+            tr.addEventListener('click', (ev) => {
+                // if user clicked a button/interactive element inside the row, do nothing
+                openEventSite(window.location.hash, id); // use DB key if you have it instead
+            });
+
+            // visual affordance
+            tr.style.cursor = 'pointer';
         });
 
         window.sortiereNachNaechstemDatum(tableId);

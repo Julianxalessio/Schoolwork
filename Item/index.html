@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Task Details</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <button class="close-btn" title="Schließen" onclick="closeWindow()">&times;</button>
+    <div class="container">
+        <!-- Task Information -->
+        <section class="task-info">
+            <h2>Mathe Hausaufgabe</h2>
+            <p>Bis: 30.08.2025</p>
+            <p>Beschreibung: Löse die Aufgaben auf Seite 42.</p>
+        </section>
+
+        <!-- Comments Section -->
+        <section class="comments">
+            <h3>Kommentare</h3>
+            <div class="comment">
+                <span class="comment-author">Anna</span>
+                <span class="comment-date">29.08.2025</span>
+                <p>Ich habe eine Frage zu Aufgabe 3.</p>
+            </div>
+            <div class="comment">
+                <span class="comment-author">Max</span>
+                <span class="comment-date">29.08.2025</span>
+                <p>Die Aufgabe ist echt schwer!</p>
+            </div>
+            <div class="comment">
+                <span class="comment-author">Max</span>
+                <span class="comment-date">29.08.2025</span>
+                <p>Die Aufgabe ist echt schwer!</p>
+            </div>
+            <div class="comment">
+                <span class="comment-author">Max</span>
+                <span class="comment-date">29.08.2025</span>
+                <p>Die Aufgabe ist echt schwer!</p>
+            </div>
+            <div class="comment">
+                <span class="comment-author">Max</span>
+                <span class="comment-date">29.08.2025</span>
+                <p>Die Aufgabe ist echt schwer!</p>
+            </div>
+            <div class="comment">
+                <span class="comment-author">Max</span>
+                <span class="comment-date">29.08.2025</span>
+                <p>Die Aufgabe ist echt schwer!</p>
+            </div>
+            <div class="comment">
+                <span class="comment-author">Max</span>
+                <span class="comment-date">29.08.2025 11:12</span>
+                <p>Die Aufgabe ist echt schwer!</p>
+            </div>
+            <div class="comment">
+                <span class="comment-author">Max</span>
+                <span class="comment-date">29.08.2025</span>
+                <p>Die Aufgabe ist echt schwer!</p>
+            </div>
+        </section>
+
+        <!-- Comment Input Section -->
+        <section class="comment-input">
+            <textarea placeholder="Kommentar schreiben..." class="input-comment"></textarea>
+            <div class="input-actions">
+                <label class="upload-btn">
+                    <input type="file" accept="image/*" style="display:none;">
+                    Bild hochladen
+                </label>
+                <button class="send-btn">Senden</button>
+            </div>
+        </section>
+    </div>
+    <script src="script.js"></script>
+</body>
+
+</html>
