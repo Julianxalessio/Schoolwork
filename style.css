@@ -110,6 +110,7 @@ u { text-underline-offset: 4px; }
 .adminLogin.navBarItem {
     margin-left: auto;
     border: 1px dashed var(--border);
+    cursor: pointer;
 }
 
 /* ---------- Admin Field Panel ---------- */
@@ -203,43 +204,38 @@ u { text-underline-offset: 4px; }
 }
 
 /* ---------- Tables ---------- */
-#TableTest,
-#TableTask {
+.tableKind {
     width: 100%;
     border-collapse: collapse;
     table-layout: fixed;
 }
 
-#TableTest .Zeile th,
-#TableTask .Zeile th {
+.tableKind .Zeile th, .Zeile th {
     text-align: left;
     font-weight: 800;
     padding: 12px 10px;
     border-bottom: 2px solid var(--border);
 }
 
-#TableTest th,
-#TableTask th {
+.tableKind th, th {
     text-align: left;
     font-weight: 600;
     padding: 12px 10px;
     border-bottom: 1px solid var(--border);
 }
 
-#TableTest tr:hover th,
-#TableTask tr:hover th {
+.tableKind tr:hover th, tr:hover th {
     background: color-mix(in oklab, var(--muted) 55%, transparent);
 }
 
 /* Zebra rows for better scanability */
-#TableTest tr:nth-child(even):not(.Zeile) th,
-#TableTask tr:nth-child(even):not(.Zeile) th {
+.tableKind tr:nth-child(even):not(.Zeile) th, tr:nth-child(even):not(.Zeile) th {
     background: color-mix(in oklab, var(--muted) 35%, transparent);
 }
 
-#TableTest th:nth-child(1), #TableTask th:nth-child(1) { width: 50%; }
-#TableTest th:nth-child(2), #TableTask th:nth-child(2) { width: 25%; }
-#TableTest th:nth-child(3), #TableTask th:nth-child(3) { width: 25%; }
+.tableKind th:nth-child(1),  th:nth-child(1) { width: 50%; }
+.tableKind th:nth-child(2),  th:nth-child(2) { width: 25%; }
+.tableKind th:nth-child(3),  th:nth-child(3) { width: 25%; }
 
 /* Empty state cell */
 .table-empty {

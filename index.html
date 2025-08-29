@@ -16,7 +16,7 @@
         <!--BM-->
         <a onclick="manageNavBarActive(this, true)" href="#WirtschaftRecht" class="navBarItem">Wirtschaft & Recht</a>
         <a onclick="manageNavBarActive(this, true)" href="#Deutsch" class="navBarItem">Deutsch</a>
-        <a onclick="manageNavBarActive(this, true)" href="#Französisch" class="navBarItem">Französisch</a>
+        <a onclick="manageNavBarActive(this, true)" href="#Franz" class="navBarItem">Französisch</a>
         <a onclick="manageNavBarActive(this, true)" href="#Sport" class="navBarItem">Sport</a>
         <a onclick="manageNavBarActive(this, true)" href="#Mathe" class="navBarItem">Mathe</a>
         <!--Berufsschule-->
@@ -29,21 +29,21 @@
     <div class="Body">
         <div class="ItemContainer">
             <a><u>Test</u></a>
-            <table id="TableTest">
+            <table id="TableTest" class="tableKind">
                 <tr class="Zeile">
                     <th>Aufgabe</th>
                     <th>Bis wann</th>
-                    <th>Löschen</th>
+                    <th>Loeschen</th>
                 </tr>
             </table>
         </div>
         <div class="ItemContainer">
             <a><u>Hausaufgaben</u></a>
-            <table id="TableTask">
+            <table id="TableTask" class="tableKind">
                 <tr class="Zeile">
                     <th>Aufgabe</th>
                     <th>Bis wann</th>
-                    <th>Löschen</th>
+                    <th>Loeschen</th>
                 </tr>
             </table>
         </div>
@@ -62,10 +62,9 @@
     </div>
 
     <footer>
-        <small>Schoolwork · made for you</small>
+        <small>Schoolwork</small>
     </footer>
 
-    <script src="public.js"></script>
     <script src="script.js"></script>
     <script src="firebase.js" type="module"></script>
 </body>

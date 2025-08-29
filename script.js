@@ -19,18 +19,15 @@ function showAdminField() {
 
 function getEventPropertys() {
     if (LogedIn == true) {
-        const eventType = document.getElementById("eventTyp").value;
+        const eventType = document.getElementById("eventTyp").value; // "Test" or "Husi"
         const eventName = document.getElementById("EventName").value;
-        const eventDate = document.getElementById("EventDate").value;
+        const eventDate = document.getElementById("EventDate").value; // ISO yyyy-mm-dd
         if (!eventName || !eventDate) {
             alert("Bitte Name und Datum ausfuellen.");
             return;
         }
-        if (eventType === "Test") {
-            createTest(eventName, eventDate);
-        } else if (eventType === "Husi") {
-            createTask(eventName, eventDate);
-        }
+        const kind = (eventType === "Test") ? "Test" : "Task"; // map Husi -> Task
+        createEvent(eventName, eventDate, kind);
     } else {
         alert("Admin not loged in");
     }
@@ -66,7 +63,7 @@ window.updateEmptyState = function(tableId) {
         const cell = document.createElement("th");
         cell.className = "table-empty";
         cell.colSpan = 3;
-        cell.textContent = "Keine Eintraege – @ fuer Admin-Feld.";
+        cell.textContent = "Keine Eintraege";
         row.appendChild(cell);
         table.appendChild(row);
     } else if (hasRows && existing) {
@@ -95,59 +92,26 @@ window.sortiereNachNaechstemDatum = function(tableId) {
     window.updateEmptyState(tableId);
 };
 
-function createTest(Name, datum) {
-    const tableId = "TableTest";
-    const table = document.getElementById(tableId);
-    window.ensureTableHeader(tableId);
-
-    let NewTR = document.createElement("tr");
-    let ID = Name + datum;
-    if (document.getElementById(ID)) {
-        alert("Eintrag existiert bereits.");
-        return;
+function resetTables(){
+    const tableTest = document.getElementById("TableTest");
+    const tableTask = document.getElementById("TableTask");
+    if (tableTest) {
+        window.ensureTableHeader("TableTest");
+        window.updateEmptyState("TableTest");
     }
-    NewTR.id = ID;
-    NewTR.dataset.date = datum;
-
-    let NewTH1 = document.createElement("th");
-    NewTH1.textContent = Name;
-
-    let NewTH2 = document.createElement("th");
-    NewTH2.textContent = window.formatDateCH(datum);
-
-    let NewTH3 = document.createElement("th");
-
-    let deleteBtn = document.createElement("button");
-    deleteBtn.className = "btn btn-delete";
-    deleteBtn.innerHTML = `<span class="mdi mdi-delete"></span> <span>Delete</span>`;
-    deleteBtn.onclick = function () {
-        if (LogedIn == true) {
-            NewTR.remove();
-            RemoveTest(ID);
-            window.updateEmptyState(tableId);
-        } else {
-            alert("No permission to delete event");
-        }
-    };
-
-    NewTH3.appendChild(deleteBtn);
-
-    NewTR.appendChild(NewTH1);
-    NewTR.appendChild(NewTH2);
-    NewTR.appendChild(NewTH3);
-    table.appendChild(NewTR);
-    window.sortiereNachNaechstemDatum(tableId);
-
-    uploadTestToFirebase(ID, Name, datum);
+    if (tableTask) {
+        window.ensureTableHeader("TableTask");
+        window.updateEmptyState("TableTask");
+    }
 }
 
-function createTask(Name, datum) {
-    const tableId = "TableTask";
-    const table = document.getElementById(tableId);
+function createEvent(Name, datum, kind) {
+    const tableId = (kind === "Test") ? "TableTest" : "TableTask";
+    let table = document.getElementById(tableId);
     window.ensureTableHeader(tableId);
 
     let NewTR = document.createElement("tr");
-    let ID = Name + datum;
+    let ID = Name + datum + kind;
     if (document.getElementById(ID)) {
         alert("Eintrag existiert bereits.");
         return;
@@ -155,36 +119,30 @@ function createTask(Name, datum) {
     NewTR.id = ID;
     NewTR.dataset.date = datum;
 
-    let NewTH1 = document.createElement("th");
-    NewTH1.textContent = Name;
+    NewTR.innerHTML = `
+        <th>${Name}</th>
+        <th>${window.formatDateCH(datum)}</th>
+        <th>
+            <button class="btn btn-delete">Delete</button>
+        </th>
+    `;
 
-    let NewTH2 = document.createElement("th");
-    NewTH2.textContent = window.formatDateCH(datum);
+    table.appendChild(NewTR);
 
-    let NewTH3 = document.createElement("th");
-
-    let deleteBtn = document.createElement("button");
-    deleteBtn.className = "btn btn-delete";
-    deleteBtn.innerHTML = `<span class="mdi mdi-delete"></span> <span>Delete</span>`;
+    const deleteBtn = NewTR.querySelector("button.btn-delete");
     deleteBtn.onclick = function () {
         if (LogedIn == true) {
             NewTR.remove();
-            RemoveTask(ID);
+            RemoveEvent(ID, kind);
             window.updateEmptyState(tableId);
         } else {
             alert("No permission to delete event");
         }
     };
 
-    NewTH3.appendChild(deleteBtn);
-
-    NewTR.appendChild(NewTH1);
-    NewTR.appendChild(NewTH2);
-    NewTR.appendChild(NewTH3);
-    table.appendChild(NewTR);
     window.sortiereNachNaechstemDatum(tableId);
 
-    uploadTaskToFirebase(ID, Name, datum);
+    uploadToFirebase(ID, Name, datum, kind);
 }
 
 function manageNavBarActive(button = null, reload = false) {
@@ -200,9 +158,8 @@ function manageNavBarActive(button = null, reload = false) {
         const targetHash = button ? button.getAttribute("href") : hash;
         if (targetHash && window.location.hash !== targetHash) {
             window.location.hash = targetHash;
-        } else {
-            window.location.reload();
         }
+        window.location.reload();
     }
 }
 
