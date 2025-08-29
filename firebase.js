@@ -1,6 +1,21 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getDatabase, ref, set, remove, onValue, get } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
-import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import {
+    initializeApp
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import {
+    getDatabase,
+    ref,
+    set,
+    remove,
+    onValue,
+    get
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+import {
+    getAuth,
+    onAuthStateChanged,
+    createUserWithEmailAndPassword,
+    signInWithEmailAndPassword,
+    signOut
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyA1f1LlbGrevYqPojOGjFZZFeSCg_TiPYI",
@@ -25,11 +40,14 @@ window.authLogin = async function () {
     const passEl = document.getElementById('authPassword');
     const email = emailEl ? emailEl.value.trim() : '';
     const password = passEl ? passEl.value : '';
-    if (!email || !password) { alert('Bitte E-Mail und Passwort eingeben.'); return; }
+    if (!email || !password) {
+        alert('Bitte E-Mail und Passwort eingeben.');
+        return;
+    }
     try {
         await signInWithEmailAndPassword(auth, email, password);
     } catch (e) {
-        alert('Login fehlgeschlagen: ' + (e?.message || e));
+        alert('Login fehlgeschlagen: ' + (e ?.message || e));
     }
 }
 
@@ -38,17 +56,19 @@ window.authRegister = async function () {
     const passEl = document.getElementById('authPassword');
     const email = emailEl ? emailEl.value.trim() : '';
     const password = passEl ? passEl.value : '';
-    if (!email || !password) { alert('Bitte E-Mail und Passwort eingeben.'); return; }
+    if (!email || !password) {
+        alert('Bitte E-Mail und Passwort eingeben.');
+        return;
+    }
     try {
         await createUserWithEmailAndPassword(auth, email, password);
         // user is now signed in
     } catch (e) {
-        alert('Registrierung fehlgeschlagen: ' + (e?.message || e));
+        alert('Registrierung fehlgeschlagen: ' + (e ?.message || e));
     }
 }
 
 function updateAuthUI(isLoggedIn) {
-    // Mirror to global for legacy checks
     window.LogedIn = isLoggedIn;
     const btn = document.getElementById("authBtn");
     const label = btn ? btn.querySelector('.auth-label') : null;
@@ -70,18 +90,26 @@ function updateAuthUI(isLoggedIn) {
             btn.setAttribute('aria-label', 'Login');
         }
     }
+    // Always toggle .hide on all last th cells
+    let lastThs = document.querySelectorAll("tr th:last-child");
+    lastThs.forEach(th => {
+        th.classList.toggle('hide', window.IsAdmin);
+    });
+
     if (adminField) {
         adminField.classList.toggle('hide', !window.IsAdmin);
     }
-    if (panel) {
-        // Close the panel when logged in
+    if (panel) { 
         panel.classList.toggle('hide', isLoggedIn || !panel.classList.contains('open'));
     }
 }
 
 async function refreshAdminFlag(user) {
     try {
-        if (!user) { window.IsAdmin = false; return; }
+        if (!user) {
+            window.IsAdmin = false;
+            return;
+        }
         const adminSnap = await get(ref(db, `admins/${user.uid}`));
         window.IsAdmin = !!adminSnap.val();
     } catch (e) {
@@ -117,8 +145,11 @@ function encodeKey(key) {
 }
 
 // --- CRUD helpers ---
-window.uploadToFirebase = async function (ID, Name, Datum, kind){
-    if (!window.IsAdmin) { alert('Nur Admins duerfen Eintraege erstellen.'); return null; }
+window.uploadToFirebase = async function (ID, Name, Datum, kind) {
+    if (!window.IsAdmin) {
+        alert('Nur Admins duerfen Eintraege erstellen.');
+        return null;
+    }
     // Use readable keys; avoid overwrite by adding a numeric suffix on collision
     const basePath = `${window.location.hash.slice(1)}/${kind}`;
 
@@ -130,7 +161,10 @@ window.uploadToFirebase = async function (ID, Name, Datum, kind){
         const candidateRef = ref(db, `${basePath}/${key}`);
         const snap = await get(candidateRef);
         if (!snap.exists()) {
-            await set(candidateRef, { Datum, Name });
+            await set(candidateRef, {
+                Datum,
+                Name
+            });
             return key; // give caller the real key we used
         }
         attempt += 1;
@@ -138,16 +172,23 @@ window.uploadToFirebase = async function (ID, Name, Datum, kind){
     }
 }
 
-window.RemoveEvent = function (ID, kind){
-    if (!window.IsAdmin) { alert('Nur Admins duerfen Eintraege loeschen.'); return; }
+window.RemoveEvent = function (ID, kind) {
+    if (!window.IsAdmin) {
+        alert('Nur Admins duerfen Eintraege loeschen.');
+        return;
+    }
     const pathToDelete = `${window.location.hash.slice(1)}/${kind}/${encodeKey(ID)}`;
     remove(ref(db, pathToDelete))
-        .then(() => { console.log("Daten erfolgreich geloescht."); })
-        .catch((error) => { console.error("Fehler beim Loeschen:", error); });
+        .then(() => {
+            console.log("Daten erfolgreich geloescht.");
+        })
+        .catch((error) => {
+            console.error("Fehler beim Loeschen:", error);
+        });
 }
 
 // --- Realtime listeners ---
-window.getEvent = function (kind){
+window.getEvent = function (kind) {
     const tableId = (kind === "Test") ? "TableTest" : "TableTask";
 
     // Unsubscribe previous
@@ -166,19 +207,28 @@ window.getEvent = function (kind){
             return;
         }
 
-        const entries = Object.entries(data).map(([id, v]) => ({ id, ...v }));
+        const entries = Object.entries(data).map(([id, v]) => ({
+            id,
+            ...v
+        }));
         // Sort by date ascending, closest first
-        entries.sort((a,b) => new Date(a.Datum) - new Date(b.Datum));
+        entries.sort((a, b) => new Date(a.Datum) - new Date(b.Datum));
 
         const table = document.getElementById(tableId);
-        entries.forEach(({ id, Name, Datum }) => {
+        entries.forEach(({
+            id,
+            Name,
+            Datum
+        }) => {
             const tr = document.createElement("tr");
             tr.id = id;
             tr.dataset.date = Datum;
             tr.innerHTML = `
                 <th>${Name}</th>
                 <th>${window.formatDateCH(Datum)}</th>
-                <th><button class="btn btn-delete">Delete</button></th>
+                <th class="hide">
+                    <button class="btn btn-delete">Delete</button>
+                </th>
             `;
             table.appendChild(tr);
 
@@ -196,7 +246,8 @@ window.getEvent = function (kind){
         window.sortiereNachNaechstemDatum(tableId);
     });
 
-    if (kind === "Test") unsubTest = handler; else unsubTask = handler;
+    if (kind === "Test") unsubTest = handler;
+    else unsubTask = handler;
 }
 
 // Start listeners

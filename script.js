@@ -32,7 +32,7 @@ window.ensureTableHeader = function(tableId) {
     headRow.className = "Zeile";
     const th1 = document.createElement("th"); th1.textContent = "Aufgabe";
     const th2 = document.createElement("th"); th2.textContent = "Bis wann";
-    const th3 = document.createElement("th"); th3.textContent = "Loeschen";
+    const th3 = document.createElement("th"); th3.textContent = "Löschen"; th3.classList.add("hide");
     headRow.appendChild(th1); headRow.appendChild(th2); headRow.appendChild(th3);
     table.appendChild(headRow);
 };
@@ -45,7 +45,7 @@ window.updateEmptyState = function(tableId) {
     if (!hasRows && !existing) {
         const row = document.createElement("tr");
         const cell = document.createElement("th");
-        cell.className = "table-empty";
+        cell.classList.add ("table-empty", "hide");
         cell.colSpan = 3;
         cell.textContent = "Keine Eintraege";
         row.appendChild(cell);
@@ -111,7 +111,7 @@ async function createEvent(Name, datum, kind) {
     NewTR.innerHTML = `
         <th>${Name}</th>
         <th>${window.formatDateCH(datum)}</th>
-        <th>
+        <th class="hide">
             <button class="btn btn-delete">Delete</button>
         </th>
     `;
