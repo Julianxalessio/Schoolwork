@@ -40,3 +40,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const sendBtn = document.querySelector('.send-btn');
     if (sendBtn) sendBtn.addEventListener('click', () => window.createComment());
 });
+
+function closeWindow(){
+    window.location.replace(`../${oldHash}`);
+}
