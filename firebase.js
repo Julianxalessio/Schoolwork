@@ -14,7 +14,8 @@ import {
     onAuthStateChanged,
     createUserWithEmailAndPassword,
     signInWithEmailAndPassword,
-    signOut
+    signOut,
+    sendEmailVerification     // <-- neu
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
 const firebaseConfig = {
@@ -46,8 +47,13 @@ window.authLogin = async function () {
     }
     try {
         await signInWithEmailAndPassword(auth, email, password);
+        // after sign-in check verification
+        if (auth.currentUser && !auth.currentUser.emailVerified) {
+            alert('Bitte bestätige zuerst deine E-Mail-Adresse. Du wirst jetzt abgemeldet.');
+            await signOut(auth);
+        }
     } catch (e) {
-        alert('Login fehlgeschlagen: ' + (e ?.message || e));
+        alert('Login fehlgeschlagen: ' + (e?.message || e));
     }
 }
 
@@ -61,10 +67,19 @@ window.authRegister = async function () {
         return;
     }
     try {
-        await createUserWithEmailAndPassword(auth, email, password);
-        // user is now signed in
+        const userCred = await createUserWithEmailAndPassword(auth, email, password);
+        // send verification email
+        try {
+            await sendEmailVerification(userCred.user);
+            alert('Registrierung erfolgreich. Eine Bestätigungs-E-Mail wurde versendet. Bitte bestätige deine E-Mail bevor du dich anmeldest. Die Mail landet höchstwarscheinlich im Spamordner.');
+        } catch (sevErr) {
+            console.warn('Error sending verification email:', sevErr);
+            alert('Registriert, aber Bestätigungs-E-Mail konnte nicht gesendet werden. Prüfe deine Eingabe oder versuche später erneut.');
+        }
+        // sign out newly created (require verification before use)
+        await signOut(auth);
     } catch (e) {
-        alert('Registrierung fehlgeschlagen: ' + (e ?.message || e));
+        alert('Registrierung fehlgeschlagen: ' + (e?.message || e));
     }
 }
 
@@ -139,8 +154,36 @@ window.toggleAuth = async function () {
 
 // React to auth changes
 onAuthStateChanged(auth, async (user) => {
-    await refreshAdminFlag(user);
+    // if a user exists but email not verified -> force sign-out and inform
+    if (user && !user.emailVerified) {
+        alert('Bitte bestätige deine E-Mail-Adresse (Link in der Bestätigungs-Mail). Du wirst abgemeldet.');
+        try { await signOut(auth); } catch (e) { console.warn('SignOut failed', e); }
+        // ensure UI shows logged out state
+        updateAuthUI(false);
+        window.IsAdmin = false;
+
+        // clear user vars
+        window.UserEmailPrefix = null;
+        window.UserEmailLocal = null;
+        return;
+    }
+
+    await refreshAdminFlag(user); // will set window.IsAdmin appropriately (uses user.uid)
     updateAuthUI(!!user);
+
+    // --- new: expose email parts for script.js ---
+    if (user && user.email) {
+        const email = String(user.email);
+        const atIndex = email.indexOf('@');
+        // keep everything before the @ and include the @ at the end
+        const prefixWithAt = atIndex !== -1 ? email.slice(0, atIndex + 1) : email;
+        const localPart = atIndex !== -1 ? email.slice(0, atIndex) : email;
+        window.UserEmailPrefix = prefixWithAt; // e.g. "julia.smith@"
+        window.UserEmailLocal = localPart;      // e.g. "julia.smith"
+    } else {
+        window.UserEmailPrefix = null;
+        window.UserEmailLocal = null;
+    }
 });
 
 let unsubTest = null;
@@ -251,8 +294,8 @@ window.getEvent = function (kind) {
                     ev.stopPropagation();
                     if (window.IsAdmin) {
                         // your existing delete logic here (adjust function name if needed)
-                        NewTR.remove();
-                        RemoveEvent(localId, kind);
+                        tr.remove();
+                        RemoveEvent(id, kind);
                         window.updateEmptyState(tableId);
                     } else {
                         alert('No permission to delete event');
@@ -263,7 +306,7 @@ window.getEvent = function (kind) {
             // add event listener for row click – ignore clicks on controls inside the row
             tr.addEventListener('click', (ev) => {
                 // if user clicked a button/interactive element inside the row, do nothing
-                openEventSite(window.location.hash, id); // use DB key if you have it instead
+                openEventSite(window.location.hash, id, kind); // use DB key if you have it instead
             });
 
             // visual affordance

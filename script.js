@@ -135,12 +135,13 @@ async function createEvent(Name, datum, kind) {
 
     // add event listener for row click – ignore clicks on controls inside the row
     NewTR.addEventListener('click', (ev) => {
-      openEventSite(window.location.hash, Id); // use DB key if you have it instead
+      openEventSite(window.location.hash, Id, kind); // use DB key if you have it instead
     });
 
     // visual affordance
     NewTR.style.cursor = 'pointer';
     window.sortiereNachNaechstemDatum(tableId);
+    uploadToFirebase(Id, Name, datum, kind);
 }
 
 function manageNavBarActive(button = null, reload = false) {
@@ -163,7 +164,7 @@ function manageNavBarActive(button = null, reload = false) {
 
 document.addEventListener("DOMContentLoaded", () => manageNavBarActive(null, false));
 
-function openEventSite(oldHash, Id){
+function openEventSite(oldHash, Id, kind){
     console.log("Button pressed");
-    window.location.replace(window.location.origin + `/Item/?oldHash=${encodeURIComponent(oldHash)}&eventId=${encodeURIComponent(Id)}`);
+    window.location.replace(window.location.origin + `/Item/?oldHash=${encodeURIComponent(oldHash)}&eventId=${encodeURIComponent(Id)}&user=${encodeURIComponent(window.UserEmailLocal)}&kind=${encodeURIComponent(kind)}`);
 }
