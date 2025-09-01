@@ -4,22 +4,33 @@ const eventId = params.get("eventId");
 const currentUser = params.get("user");
 const kind = params.get("kind");
 const userUid = params.get("uid");
+let createDeleteButton = false;
+
+getEvent(oldHash, kind, eventId);
 
 refreshAdminFlag(userUid);
+
 function initialize() {
     console.log("Initialize");
     getCommentsFromFirebase(oldHash || "#", eventId || '', kind || '');
 }
 
-// make the function global so onclick="createComment()" resolves to this, not Document.createComment
-window.createCommentToFirebase = function (createDeleteButton) {
+let skipNextOnValue = false;
+
+window.createCommentToFirebase = async function (createDeleteButton) {
     const textarea = document.querySelector(".input-comment");
+    const fileInput = document.querySelector(".comment-image-input");
     if (!textarea) return console.error("Textarea .input-comment not found");
+
     const content = textarea.value.trim();
-    if (!content) return; // nothing to send
+    if (!content && !fileInput.files.length) return; // Nichts zum Senden
+
+    let imageUrl = null;
+    if (fileInput.files.length) {
+        imageUrl = await uploadImageToCloudinary(fileInput.files[0]);
+    }
 
     let Hash = oldHash.slice(1);
-
     const now = new Date();
     const pad = n => String(n).padStart(2, '0');
     const day = pad(now.getDate());
@@ -32,31 +43,32 @@ window.createCommentToFirebase = function (createDeleteButton) {
 
     const user = currentUser || window.UserEmailLocal || 'anonymous';
 
-    createCommentForDiv(content, user, isoDate, createDeleteButton);
+    // Direkt lokal anzeigen
+    createCommentForDiv(content, user, isoDate, createDeleteButton, imageUrl);
 
     if (typeof window.createCommentOnFirebase === 'function') {
-        window.createCommentOnFirebase(Hash || "#", eventId || '', content, isoDate, kind || '', user)
+        skipNextOnValue = true; // Damit onValue den gerade gesendeten Kommentar ignoriert
+        window.createCommentOnFirebase(Hash || "#", eventId || '', content, isoDate, kind || '', user, imageUrl)
             .then(() => {
                 textarea.value = '';
+                fileInput.value = null; // Input zurücksetzen
             })
             .catch(err => console.error('Fehler beim Erstellen des Kommentars:', err));
-    } else {
-        console.error('createCommentOnFirebase not available');
     }
 };
 
+
+
 document.addEventListener('DOMContentLoaded', () => {
     const sendBtn = document.querySelector('.send-btn');
-    if (sendBtn) sendBtn.addEventListener('click', () => window.createCommentToFirebase(true));
+    if (sendBtn) sendBtn.addEventListener('click', () => window.createCommentToFirebase());
 });
 
-function closeWindow(){
+function closeWindow() {
     window.location.replace(`../${oldHash}`);
 }
 
-window.createCommentForDiv = function (content, user, date, createDeleteButton) {
-    console.log(createDeleteButton);
-    console.log("Createcomment");
+window.createCommentForDiv = function (content, user, date, createDeleteButton, imageUrl = null) {
     const comments = document.querySelector(".comments");
     if (!comments) return;
 
@@ -74,30 +86,48 @@ window.createCommentForDiv = function (content, user, date, createDeleteButton) 
     const contentElement = document.createElement("p");
     contentElement.innerHTML = content.replace(/\n/g, "<br>");
 
+    div.appendChild(userElement);
+    div.appendChild(dateElement);
     const deleteButton = document.createElement("button");
     deleteButton.textContent = "Delete";
     deleteButton.classList.add("btn", "btn-delete");
     deleteButton.style.marginLeft = "10px";
-
-    if (window.IsAdmin || createDeleteButton ) {
-        deleteButton.style.display = "inline-block";   
+    if (window.IsAdmin || createDeleteButton) {
+        deleteButton.style.display = "inline-block";
         deleteButton.addEventListener("click", (ev) => {
             ev.stopPropagation();
             deleteCommentFromFirebase(oldHash.slice(1), eventId, user, date, kind);
             div.remove();
         });
     } else {
-        deleteButton.style.display = "none"; // Hide delete button for non-admins
+        deleteButton.style.display = "none";
     }
 
-    div.appendChild(userElement);
-    div.appendChild(dateElement);
     div.appendChild(deleteButton);
     div.appendChild(contentElement);
+
+    if (imageUrl) {
+        const img = document.createElement("img");
+        img.src = imageUrl;
+        img.style.maxHeight = "1200px"; // optional
+        img.style.display = "block";
+        img.style.marginTop = "5px";
+        div.appendChild(img);
+    }
 
     comments.appendChild(div);
 };
 
+
 function encodeKey(key) {
     return key.replace(/[.#$\[\]/]/g, c => '!' + c.charCodeAt(0));
 };
+
+function UpdateEvent() {
+    let updateNameObject = document.querySelector(".update-name").value;
+    let updateDescriptionObject = document.querySelector(".update-description").value;
+    let updateDateObject = document.querySelector(".update-date").value;
+    console.log(updateNameObject, updateDateObject, updateDescriptionObject);
+
+    window.updateEventFromAdmin(oldHash, kind, eventId, updateNameObject, updateDateObject, updateDescriptionObject);
+}

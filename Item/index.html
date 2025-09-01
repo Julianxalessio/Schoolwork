@@ -12,30 +12,38 @@
     <div class="container">
         <!-- Task Information -->
         <section class="task-info">
-            <h2>Mathe Hausaufgabe</h2>
-            <p>Bis: 30.08.2025</p>
+            <h2>Aufgabename</h2>
+            <p class="Date">Datum</p>
             <p>Beschreibung: Löse die Aufgaben auf Seite 42.</p>
         </section>
 
         <!-- Comments Section -->
         <section class="comments">
             <h3>Kommentare</h3>
-            
+
         </section>
 
         <!-- Comment Input Section -->
         <section class="comment-input">
             <textarea placeholder="Kommentar schreiben..." class="input-comment"></textarea>
             <div class="input-actions">
-                <!--<label class="upload-btn">
-                    <input type="file" accept="image/*" style="display:none;">
+                <label class="upload-btn">
+                    <input type="file" accept="image/*" style="display:none;" class="comment-image-input">
                     Bild hochladen
-                </label>-->
+                </label>
+
                 <button class="send-btn">Senden</button>
             </div>
         </section>
     </div>
-    <script src="firebase.js" type="module" src=""></script>
+    <div class="container admin-change-field">
+        <textarea name="Name" placeholder="Neuer Name" class="update-name input-comment comment-input"></textarea>
+        <textarea name="Beschreibung" placeholder="Neue Beschreibung"
+            class="update-description input-comment comment-input"></textarea>
+        <input type="date" class="update-date" placeholder="Datum">
+        <button onclick="UpdateEvent()" class="btn-update">UpdateEvent</button>
+    </div>
+    <script src="firebase.js" type="module"></script>
     <script src="script.js" defer></script>
 </body>
 

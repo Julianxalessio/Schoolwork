@@ -7,7 +7,8 @@ import {
     set,
     remove,
     onValue,
-    get
+    get,
+    update
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 import {
     getAuth,
@@ -37,35 +38,57 @@ const auth = getAuth(app);
 window.IsAdmin = false;
 
 window.refreshAdminFlag = function (user) {
-        get(ref(db, `admins/${user}`)).then((adminSnap) => {
-            window.IsAdmin = !!adminSnap.val();
-            initialize();
-        }).catch((error) => {
-            console.error("Fehler beim Abrufen:", error);
-            window.IsAdmin = false;
-            initialize();
-        });
+    get(ref(db, `admins/${user}`)).then((adminSnap) => {
+        window.IsAdmin = !!adminSnap.val();
+        initialize();
+        if (window.IsAdmin) {
+            let adminPanel = document.querySelector(".admin-change-field");
+            if (adminPanel) {
+                adminPanel.style.display = "block";
+            }
+        } else {
+            let userPanel = document.querySelector(".admin-change-field");
+            if (userPanel) {
+                userPanel.style.display = "none";
+            }
+        }
+    }).catch((error) => {
+        console.error("Fehler beim Abrufen:", error);
+        window.IsAdmin = false;
+        initialize();
+    });
 
 }
 
-window.createCommentOnFirebase = async function (Hash, ID, content, Datum, kind, user) {
+window.createCommentOnFirebase = async function (Hash, ID, content, Datum, kind, user, imageData = null) {
     try {
         const db = getDatabase();
         const key = encodeKey(ID);
         const userEncoded = encodeKey(user);
-        const commentKey = userEncoded + encodeKey(Datum); // Key bleibt kodiert
+        const commentKey = userEncoded + encodeKey(Datum);
         const commentRef = ref(db, `${Hash}/${kind}/${key}/comments/${commentKey}`);
 
-        await set(commentRef, {
-            date: Datum, // ✅ Datum wird jetzt sauber gespeichert
+        const commentData = {
+            date: Datum,
             content: content,
             user: user || null
-        });
+        };
+
+        // Nur hinzufügen, wenn ein Bild existiert
+        if (imageData && imageData.url) {
+            commentData.imageUrl = imageData.url;
+            commentData.public_id = imageData.public_id || null;
+        }
+
+        await set(commentRef, commentData);
+
         console.log('Kommentar gespeichert', commentRef.toString());
     } catch (error) {
         console.error("Fehler beim Speichern des Kommentars:", error);
     }
-}
+};
+
+
 
 function encodeKey(key) {
     return key.replace(/[.#$\[\]/]/g, c => '!' + c.charCodeAt(0));
@@ -94,6 +117,11 @@ window.getCommentsFromFirebase = async function (Hash, ID, kind, createDeleteBut
     const filesRef = ref(db, path);
 
     onValue(filesRef, (snapshot) => {
+        if (skipNextOnValue) {
+            skipNextOnValue = false;
+            return; // 🚨 Ignorieren
+        }
+
         const data = snapshot.val();
 
         // Clear old comments before rendering new ones
@@ -101,7 +129,6 @@ window.getCommentsFromFirebase = async function (Hash, ID, kind, createDeleteBut
         if (commentsDiv) {
             commentsDiv.innerHTML = "<h3>Kommentare</h3>";
         }
-        console.log(commentsDiv);
 
         if (!data) return;
 
@@ -110,17 +137,105 @@ window.getCommentsFromFirebase = async function (Hash, ID, kind, createDeleteBut
             ...v
         }));
 
-        // Direkt sortieren mit Date()
-        entries.sort((a, b) => new Date(a.date) - new Date(b.date));
+        entries.sort((a, b) => new Date(b.date) - new Date(a.date));
 
-        // Render Kommentare
         entries.forEach(({
             content,
             date,
-            user
+            user,
+            imageUrl
         }) => {
-            const formatted = date; // schon lesbar gespeichert
-            window.createCommentForDiv(content, user, formatted, createDeleteButton);
+            if (user == currentUser) {
+                createDeleteButton = true;
+            } else {
+                createDeleteButton = false;
+            }
+            console.log("Comment:", content, date, user, imageUrl);
+            window.createCommentForDiv(content, user, date, createDeleteButton, imageUrl);
         });
     });
-}
+};
+
+window.getEvent = function (Hash, kind, ID) {
+    const path = `${Hash.slice(1)}/${kind}/${encodeKey(ID)}`;
+
+    const eventRef = ref(db, path);
+
+    get(eventRef)
+        .then((snapshot) => {
+            if (snapshot.exists()) {
+                const data = snapshot.val(); // enthält alle Felder unter ID
+                const Name = data.Name;
+                const Datum = data.Datum;
+                const Beschreibung = data.Beschreibung;
+                let NameObject = document.querySelector(".task-info h2");
+                NameObject.innerHTML = Name;
+                let updateNameObject = document.querySelector(".update-name");
+                updateNameObject.innerHTML = Name;
+                let updateDescriptionObject = document.querySelector(".update-description");
+                updateDescriptionObject.innerHTML = Beschreibung;
+                let updateDateObject = document.querySelector(".update-date");
+                updateDateObject.value = Datum;
+                let DateumObject = document.querySelector(".task-info .Date");
+                DateumObject.innerHTML = "Bis: " + formatDateCH(Datum);
+                let BeschreibungObject = document.querySelector(".task-info p:nth-of-type(2)");
+                BeschreibungObject.innerHTML = "Beschreibung: " + Beschreibung.replace(/\n/g, "<br>");
+            } else {
+                console.log("Kein Event gefunden");
+            }
+        })
+        .catch((error) => {
+            console.error("Fehler beim Laden:", error);
+        });
+};
+
+window.updateEventFromAdmin = function (Hash, kind, ID, Name, Datum, Beschreibung) {
+    const path = `${Hash.slice(1)}/${kind}/${encodeKey(ID)}`;
+    console.log(Name, Datum, Beschreibung);
+
+    const eventRef = ref(db, path);
+
+    set(eventRef, {
+            Name: Name,
+            Datum: Datum, // z.B. "2025-09-01"
+            Beschreibung: Beschreibung
+        })
+        .then(() => {
+            alert("Event erfolgreich aktualisiert!");
+        })
+        .catch((error) => {
+            console.error("Fehler beim Update:", error);
+        });
+};
+
+
+window.formatDateCH = function (iso) {
+    if (!iso || !/^\d{4}-\d{2}-\d{2}$/.test(iso)) return iso || "";
+    const [y, m, d] = iso.split("-");
+    return `${d}.${m}.${y}`;
+};
+
+window.uploadImageToCloudinary = async function (file) {
+    const url = "https://api.cloudinary.com/v1_1/dd2aeimaq/upload";
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("upload_preset", "TestClassroom");
+
+    try {
+        const response = await fetch(url, {
+            method: "POST",
+            body: formData
+        });
+        const data = await response.json();
+        return {
+            url: data.secure_url,
+            public_id: data.public_id
+        };
+    } catch (err) {
+        console.error("Cloudinary Upload Error:", err);
+        return {
+            url: null,
+            public_id: null
+        };
+    }
+};
