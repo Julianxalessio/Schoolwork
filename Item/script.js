@@ -4,6 +4,8 @@ const eventId = params.get("eventId");
 const currentUser = params.get("user");
 const kind = params.get("kind");
 
+getCommentsFromFirebase(oldHash || "#", eventId || '', kind || '');
+
 // make the function global so onclick="createComment()" resolves to this, not Document.createComment
 window.createCommentToFirebase = function () {
     const textarea = document.querySelector(".input-comment");
@@ -34,31 +36,7 @@ window.createCommentToFirebase = function () {
     } else {
         console.error('createCommentOnFirebase not available');
     }
-
-    createCommentForDiv(content, user, isoDate);
 };
-
-window.createCommentForDiv = function (content, user, date){
-    let comments = document.querySelector(".comments");
-    let div = document.createElement("div");
-    div.classList.add("comment");
-
-    let userElement = document.createElement("span");
-    userElement.textContent = user;
-    let dateElement = document.createElement("span");
-    dateElement.textContent = date;
-    let contentElement = document.createElement("p");
-    contentElement.innerHTML = content.replace(/\n/g, "<br>"); // <-- FIXED
-
-    userElement.classList.add("comment-author");
-    dateElement.classList.add("comment-date");
-
-    div.appendChild(userElement);
-    div.appendChild(dateElement);
-    div.appendChild(contentElement);
-
-    comments.appendChild(div);
-}
 
 document.addEventListener('DOMContentLoaded', () => {
     const sendBtn = document.querySelector('.send-btn');
@@ -68,3 +46,28 @@ document.addEventListener('DOMContentLoaded', () => {
 function closeWindow(){
     window.location.replace(`../${oldHash}`);
 }
+
+window.createCommentForDiv = function (content, user, date) {
+    const comments = document.querySelector(".comments");
+    if (!comments) return;
+
+    const div = document.createElement("div");
+    div.classList.add("comment");
+
+    const userElement = document.createElement("span");
+    userElement.textContent = user;
+    userElement.classList.add("comment-author");
+
+    const dateElement = document.createElement("span");
+    dateElement.textContent = date;
+    dateElement.classList.add("comment-date");
+
+    const contentElement = document.createElement("p");
+    contentElement.innerHTML = content.replace(/\n/g, "<br>");
+
+    div.appendChild(userElement);
+    div.appendChild(dateElement);
+    div.appendChild(contentElement);
+
+    comments.appendChild(div);
+};

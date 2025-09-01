@@ -15,7 +15,7 @@ import {
     createUserWithEmailAndPassword,
     signInWithEmailAndPassword,
     signOut,
-    sendEmailVerification // <-- neu
+    sendEmailVerification
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
 const firebaseConfig = {
@@ -31,7 +31,6 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
-
 const auth = getAuth(app);
 
 window.createCommentOnFirebase = async function (Hash, ID, content, Datum, kind, user) {
@@ -39,13 +38,11 @@ window.createCommentOnFirebase = async function (Hash, ID, content, Datum, kind,
         const db = getDatabase();
         const key = encodeKey(ID);
         const userEncoded = encodeKey(user);
-        const dateEncoded = encodeKey(Datum);
-        // Kommentare als Liste speichern (Timestamp als eindeutiger Key)
-        const commentKey = userEncoded + dateEncoded;
+        const commentKey = userEncoded + encodeKey(Datum); // Key bleibt kodiert
         const commentRef = ref(db, `${Hash}/${kind}/${key}/comments/${commentKey}`);
 
         await set(commentRef, {
-            date: dateEncoded,
+            date: Datum,  // ✅ Datum wird jetzt sauber gespeichert
             content: content,
             user: user || null
         });
@@ -58,3 +55,45 @@ window.createCommentOnFirebase = async function (Hash, ID, content, Datum, kind,
 function encodeKey(key) {
     return key.replace(/[.#$\[\]/]/g, c => '!' + c.charCodeAt(0));
 };
+
+window.getCommentsFromFirebase = async function (Hash, ID, kind) {
+    let unsubTest = null;
+    let unsubTask = null;
+
+    // Unsubscribe previous
+    if (kind === "Test" && unsubTest) unsubTest();
+    if (kind === "Task" && unsubTask) unsubTask();
+
+    const path = `${Hash.slice(1)}/${kind}/${encodeKey(ID)}/comments`;
+    const filesRef = ref(db, path);
+
+    const handler = onValue(filesRef, (snapshot) => {
+        const data = snapshot.val();
+
+        // Clear old comments before rendering new ones
+        const commentsDiv = document.querySelector(".comments");
+        if (commentsDiv) {
+            commentsDiv.innerHTML = "<h3>Kommentare</h3>";
+        }
+
+        if (!data) return;
+
+        const entries = Object.entries(data).map(([id, v]) => ({
+            id,
+            ...v
+        }));
+
+        // Direkt sortieren mit Date()
+        entries.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+        // Render Kommentare
+        entries.forEach(({ content, date, user }) => {
+            const formatted = date; // schon lesbar gespeichert
+            window.createCommentForDiv(content, user, formatted);
+        });
+    });
+
+    // Store unsubscribe function
+    if (kind === "Test") unsubTest = handler;
+    if (kind === "Task") unsubTask = handler;
+}
