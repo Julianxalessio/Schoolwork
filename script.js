@@ -166,5 +166,5 @@ document.addEventListener("DOMContentLoaded", () => manageNavBarActive(null, fal
 
 function openEventSite(oldHash, Id, kind){
     console.log("Button pressed");
-    window.location.replace(window.location.origin + `/Item/?oldHash=${encodeURIComponent(oldHash)}&eventId=${encodeURIComponent(Id)}&user=${encodeURIComponent(window.UserEmailLocal)}&kind=${encodeURIComponent(kind)}`);
+    window.location.replace(window.location.origin + `/Item/?oldHash=${encodeURIComponent(oldHash)}&eventId=${encodeURIComponent(Id)}&user=${encodeURIComponent(window.UserEmailLocal)}&kind=${encodeURIComponent(kind)}&uid=${encodeURIComponent(window.uid)}`);
 }

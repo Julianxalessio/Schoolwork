@@ -15,7 +15,7 @@ import {
     createUserWithEmailAndPassword,
     signInWithEmailAndPassword,
     signOut,
-    sendEmailVerification
+    sendEmailVerification // <-- neu
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
 const firebaseConfig = {
@@ -29,9 +29,25 @@ const firebaseConfig = {
     measurementId: "G-JM2KZCLH3W"
 };
 
+
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const auth = getAuth(app);
+
+
+
+window.IsAdmin = false;
+
+window.refreshAdminFlag = function (user) {
+    get(ref(db, `admins/${user}`)).then((adminSnap) => {
+        window.IsAdmin = !!adminSnap.val();
+    }).catch((error) => {
+        console.error("Fehler beim Abrufen:", error);
+        window.IsAdmin = false;
+    });
+
+}
+
 
 window.createCommentOnFirebase = async function (Hash, ID, content, Datum, kind, user) {
     try {
@@ -42,7 +58,7 @@ window.createCommentOnFirebase = async function (Hash, ID, content, Datum, kind,
         const commentRef = ref(db, `${Hash}/${kind}/${key}/comments/${commentKey}`);
 
         await set(commentRef, {
-            date: Datum,  // ✅ Datum wird jetzt sauber gespeichert
+            date: Datum, // ✅ Datum wird jetzt sauber gespeichert
             content: content,
             user: user || null
         });
@@ -87,7 +103,11 @@ window.getCommentsFromFirebase = async function (Hash, ID, kind) {
         entries.sort((a, b) => new Date(a.date) - new Date(b.date));
 
         // Render Kommentare
-        entries.forEach(({ content, date, user }) => {
+        entries.forEach(({
+            content,
+            date,
+            user
+        }) => {
             const formatted = date; // schon lesbar gespeichert
             window.createCommentForDiv(content, user, formatted);
         });

@@ -3,6 +3,9 @@ const oldHash = params.get("oldHash");
 const eventId = params.get("eventId");
 const currentUser = params.get("user");
 const kind = params.get("kind");
+const userUid = params.get("uid");
+
+
 
 getCommentsFromFirebase(oldHash || "#", eventId || '', kind || '');
 
@@ -41,6 +44,7 @@ window.createCommentToFirebase = function () {
 document.addEventListener('DOMContentLoaded', () => {
     const sendBtn = document.querySelector('.send-btn');
     if (sendBtn) sendBtn.addEventListener('click', () => window.createCommentToFirebase());
+    refreshAdminFlag(userUid);
 });
 
 function closeWindow(){

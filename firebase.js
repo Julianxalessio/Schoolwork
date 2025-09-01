@@ -31,9 +31,21 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
-
 const auth = getAuth(app);
+
+
+async function getUidByUsername(username) {
+  const docRef = doc(db, "usernames", username);
+  const snapshot = await getDoc(docRef);
+  if (snapshot.exists()) {
+    return snapshot.data().uid;
+  } else {
+    return null;
+  }
+}
+
 window.IsAdmin = false;
+window.uid = null;
 
 // Simple Email/Password auth helpers
 window.authLogin = async function () {
@@ -47,7 +59,6 @@ window.authLogin = async function () {
     }
     try {
         await signInWithEmailAndPassword(auth, email, password);
-        // after sign-in check verification
         if (auth.currentUser && !auth.currentUser.emailVerified) {
             alert('Bitte bestätige zuerst deine E-Mail-Adresse. Du wirst jetzt abgemeldet.');
             await signOut(auth);
@@ -170,6 +181,7 @@ onAuthStateChanged(auth, async (user) => {
 
     await refreshAdminFlag(user); // will set window.IsAdmin appropriately (uses user.uid)
     updateAuthUI(!!user);
+    window.uid = user ? user.uid : null;
 
     // --- new: expose email parts for script.js ---
     if (user && user.email) {
