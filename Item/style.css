@@ -283,3 +283,31 @@ html, body {
    ----------------------- */
 .small { font-size: 0.9rem; color: var(--muted-text); }
 .center { text-align: center; }
+
+.btn {
+    appearance: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    height: 36px;
+    padding: 0 12px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: red;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform .06s ease, filter .15s ease, background .15s ease, border-color .15s ease;
+}
+
+.btn:hover {
+    filter: brightness(1.03);
+}
+
+.btn:active { transform: translateY(1px); }
+
+.btn-delete {
+    border-color: color-mix(in oklab, var(--danger) 60%, var(--border));
+    background: color-mix(in oklab, var(--danger) 14%, var(--card));
+    color: color-mix(in oklab, var(--danger) 70%, var(--text));
+}

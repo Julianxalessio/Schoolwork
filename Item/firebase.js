@@ -34,20 +34,26 @@ const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const auth = getAuth(app);
 
-
-
 window.IsAdmin = false;
 
 window.refreshAdminFlag = function (user) {
-    get(ref(db, `admins/${user}`)).then((adminSnap) => {
-        window.IsAdmin = !!adminSnap.val();
-    }).catch((error) => {
+    try {
+        get(ref(db, `admins/${user}`)).then((adminSnap) => {
+            window.IsAdmin = !!adminSnap.val();
+            initialize();
+        }).catch((error) => {
+            console.error("Fehler beim Abrufen:", error);
+            window.IsAdmin = false;
+            initialize();
+        });
+    } catch (error) {
         console.error("Fehler beim Abrufen:", error);
         window.IsAdmin = false;
-    });
+        initialize();
+        return;
+    }
 
 }
-
 
 window.createCommentOnFirebase = async function (Hash, ID, content, Datum, kind, user) {
     try {
@@ -72,6 +78,22 @@ function encodeKey(key) {
     return key.replace(/[.#$\[\]/]/g, c => '!' + c.charCodeAt(0));
 };
 
+window.deleteCommentFromFirebase = function (oldHash, eventId, user, date, kind) {
+    if (confirm("Are you sure you want to delete this comment?")) {
+        const userEncoded = encodeKey(user);
+        const commentKey = userEncoded + encodeKey(date);
+        const db = getDatabase();
+        const commentRef = ref(db, `${oldHash}/${kind}/${encodeKey(eventId)}/comments/${commentKey}`);
+        console.log(commentRef.toString());
+        remove(commentRef)
+            .then(() => {
+                console.log("Comment deleted");
+            })
+            .catch((error) => {
+                console.error("Error deleting comment:", error);
+            });
+    }
+};
 window.getCommentsFromFirebase = async function (Hash, ID, kind) {
     let unsubTest = null;
     let unsubTask = null;

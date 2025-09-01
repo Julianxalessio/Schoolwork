@@ -5,9 +5,10 @@ const currentUser = params.get("user");
 const kind = params.get("kind");
 const userUid = params.get("uid");
 
-
-
-getCommentsFromFirebase(oldHash || "#", eventId || '', kind || '');
+refreshAdminFlag(userUid);
+async function initialize() {
+    getCommentsFromFirebase(oldHash || "#", eventId || '', kind || '');
+}
 
 // make the function global so onclick="createComment()" resolves to this, not Document.createComment
 window.createCommentToFirebase = function () {
@@ -44,7 +45,6 @@ window.createCommentToFirebase = function () {
 document.addEventListener('DOMContentLoaded', () => {
     const sendBtn = document.querySelector('.send-btn');
     if (sendBtn) sendBtn.addEventListener('click', () => window.createCommentToFirebase());
-    refreshAdminFlag(userUid);
 });
 
 function closeWindow(){
@@ -69,9 +69,30 @@ window.createCommentForDiv = function (content, user, date) {
     const contentElement = document.createElement("p");
     contentElement.innerHTML = content.replace(/\n/g, "<br>");
 
+    const deleteButton = document.createElement("button");
+    deleteButton.textContent = "Delete";
+    deleteButton.classList.add("btn", "btn-delete");
+    deleteButton.style.marginLeft = "10px";
+
+    if (window.IsAdmin) {
+        deleteButton.style.display = "inline-block";   
+        deleteButton.addEventListener("click", (ev) => {
+            ev.stopPropagation();
+            deleteCommentFromFirebase(oldHash.slice(1), eventId, user, date, kind);
+            div.remove();
+        });
+    } else {
+        deleteButton.style.display = "none"; // Hide delete button for non-admins
+    }
+
     div.appendChild(userElement);
     div.appendChild(dateElement);
+    div.appendChild(deleteButton);
     div.appendChild(contentElement);
 
     comments.appendChild(div);
+};
+
+function encodeKey(key) {
+    return key.replace(/[.#$\[\]/]/g, c => '!' + c.charCodeAt(0));
 };
