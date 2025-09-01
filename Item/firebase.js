@@ -195,7 +195,7 @@ window.updateEventFromAdmin = function (Hash, kind, ID, Name, Datum, Beschreibun
 
     const eventRef = ref(db, path);
 
-    set(eventRef, {
+    update(eventRef, {
             Name: Name,
             Datum: Datum, // z.B. "2025-09-01"
             Beschreibung: Beschreibung

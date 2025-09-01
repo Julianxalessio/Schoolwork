@@ -18,6 +18,10 @@ function initialize() {
 let skipNextOnValue = false;
 
 window.createCommentToFirebase = async function (createDeleteButton) {
+    if (currentUser === null) {
+        alert("User is not logged in");
+        return;
+    }
     const textarea = document.querySelector(".input-comment");
     const fileInput = document.querySelector(".comment-image-input");
     if (!textarea) return console.error("Textarea .input-comment not found");
