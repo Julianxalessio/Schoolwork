@@ -73,12 +73,13 @@
     <footer>
         <small>Schoolwork</small>
     </footer>
-
-    <script>
-        
-    </script>
-
     <script src="script.js"></script>
     <script src="firebase.js" type="module"></script>
+    <script>
+        let button = document.querySelector(`.navBar a[href="#Home"]`);
+        manageNavBarActive(button, false)
+    </script>
+
+    
 </body>
 </html>
