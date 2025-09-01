@@ -37,7 +37,6 @@ const auth = getAuth(app);
 window.IsAdmin = false;
 
 window.refreshAdminFlag = function (user) {
-    try {
         get(ref(db, `admins/${user}`)).then((adminSnap) => {
             window.IsAdmin = !!adminSnap.val();
             initialize();
@@ -46,12 +45,6 @@ window.refreshAdminFlag = function (user) {
             window.IsAdmin = false;
             initialize();
         });
-    } catch (error) {
-        console.error("Fehler beim Abrufen:", error);
-        window.IsAdmin = false;
-        initialize();
-        return;
-    }
 
 }
 
@@ -94,18 +87,13 @@ window.deleteCommentFromFirebase = function (oldHash, eventId, user, date, kind)
             });
     }
 };
-window.getCommentsFromFirebase = async function (Hash, ID, kind) {
-    let unsubTest = null;
-    let unsubTask = null;
-
-    // Unsubscribe previous
-    if (kind === "Test" && unsubTest) unsubTest();
-    if (kind === "Task" && unsubTask) unsubTask();
+window.getCommentsFromFirebase = async function (Hash, ID, kind, createDeleteButton = false) {
+    console.log("Getcomments");
 
     const path = `${Hash.slice(1)}/${kind}/${encodeKey(ID)}/comments`;
     const filesRef = ref(db, path);
 
-    const handler = onValue(filesRef, (snapshot) => {
+    onValue(filesRef, (snapshot) => {
         const data = snapshot.val();
 
         // Clear old comments before rendering new ones
@@ -113,6 +101,7 @@ window.getCommentsFromFirebase = async function (Hash, ID, kind) {
         if (commentsDiv) {
             commentsDiv.innerHTML = "<h3>Kommentare</h3>";
         }
+        console.log(commentsDiv);
 
         if (!data) return;
 
@@ -131,11 +120,7 @@ window.getCommentsFromFirebase = async function (Hash, ID, kind) {
             user
         }) => {
             const formatted = date; // schon lesbar gespeichert
-            window.createCommentForDiv(content, user, formatted);
+            window.createCommentForDiv(content, user, formatted, createDeleteButton);
         });
     });
-
-    // Store unsubscribe function
-    if (kind === "Test") unsubTest = handler;
-    if (kind === "Task") unsubTask = handler;
 }

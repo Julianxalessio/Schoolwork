@@ -6,12 +6,13 @@ const kind = params.get("kind");
 const userUid = params.get("uid");
 
 refreshAdminFlag(userUid);
-async function initialize() {
+function initialize() {
+    console.log("Initialize");
     getCommentsFromFirebase(oldHash || "#", eventId || '', kind || '');
 }
 
 // make the function global so onclick="createComment()" resolves to this, not Document.createComment
-window.createCommentToFirebase = function () {
+window.createCommentToFirebase = function (createDeleteButton) {
     const textarea = document.querySelector(".input-comment");
     if (!textarea) return console.error("Textarea .input-comment not found");
     const content = textarea.value.trim();
@@ -31,6 +32,8 @@ window.createCommentToFirebase = function () {
 
     const user = currentUser || window.UserEmailLocal || 'anonymous';
 
+    createCommentForDiv(content, user, isoDate, createDeleteButton);
+
     if (typeof window.createCommentOnFirebase === 'function') {
         window.createCommentOnFirebase(Hash || "#", eventId || '', content, isoDate, kind || '', user)
             .then(() => {
@@ -44,14 +47,16 @@ window.createCommentToFirebase = function () {
 
 document.addEventListener('DOMContentLoaded', () => {
     const sendBtn = document.querySelector('.send-btn');
-    if (sendBtn) sendBtn.addEventListener('click', () => window.createCommentToFirebase());
+    if (sendBtn) sendBtn.addEventListener('click', () => window.createCommentToFirebase(true));
 });
 
 function closeWindow(){
     window.location.replace(`../${oldHash}`);
 }
 
-window.createCommentForDiv = function (content, user, date) {
+window.createCommentForDiv = function (content, user, date, createDeleteButton) {
+    console.log(createDeleteButton);
+    console.log("Createcomment");
     const comments = document.querySelector(".comments");
     if (!comments) return;
 
@@ -74,7 +79,7 @@ window.createCommentForDiv = function (content, user, date) {
     deleteButton.classList.add("btn", "btn-delete");
     deleteButton.style.marginLeft = "10px";
 
-    if (window.IsAdmin) {
+    if (window.IsAdmin || createDeleteButton ) {
         deleteButton.style.display = "inline-block";   
         deleteButton.addEventListener("click", (ev) => {
             ev.stopPropagation();
