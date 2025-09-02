@@ -60,6 +60,19 @@ window.refreshAdminFlag = function (user) {
 
 }
 
+window.getUsernameFromUid = async function (uid) {
+  const ref = doc(db, "users", uid);
+  const snap = await getDoc(ref);
+
+  if (snap.exists()) {
+    const email = snap.data().email;
+    const username = email.split("@")[0];
+    return username;
+  } else {
+    return "User unbekannt";
+  }
+}
+
 window.createCommentOnFirebase = async function (Hash, ID, content, Datum, kind, user, imageData = null) {
     try {
         const db = getDatabase();
