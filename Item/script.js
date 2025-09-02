@@ -1,9 +1,9 @@
 const params = new URLSearchParams(window.location.search);
 const oldHash = params.get("oldHash");
 const eventId = params.get("eventId");
-const currentUser = params.get("user");
 const kind = params.get("kind");
 const userUid = params.get("uid");
+const currentUser = getUsernameFromUid(userUid);
 let createDeleteButton = false;
 
 getEvent(oldHash, kind, eventId);
