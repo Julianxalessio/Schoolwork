@@ -69,6 +69,34 @@ window.getUsernameFromUid = async function (uid) {
     const username = email.split("@")[0];
     return username;
   } else {
+    alert("User nicht gefunden");
+    return "User unbekannt";
+  }
+}
+
+window.getUsernameFromUidwithRole = async function (uid) {
+  const ref = doc(db, "users", uid);
+  const snap = await getDoc(ref);
+
+  if (snap.exists()) {
+    get(ref(db, `role/${uid}`)).then((role) => {
+        window.role = !!role.val();
+        if (role != window.currentClass) {
+            alert("Du bist nicht in der richtigen Klasse eingeloggt!");
+            return "User unbekannt";
+        }
+        else {
+            const email = snap.data().email;
+            const username = email.split("@")[0];
+            return username;
+        }
+    }).catch((error) => {
+        console.error("Fehler beim Abrufen:", error);
+        window.IsAdmin = false;
+        initialize();
+    });
+  } else {
+    alert("User nicht gefunden");
     return "User unbekannt";
   }
 }
