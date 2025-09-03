@@ -108,8 +108,8 @@ async function createEvent(Name, datum, kind) {
     NewTR.classList.add('Zeile');
 
     NewTR.innerHTML = `
-      <th>${Name}</th>
-      <th>${window.formatDateCH(datum)}</th>
+      <th>${Name.toString()}</th>
+      <th>${window.formatDateCH(datum).toString()}</th>
       <th class="hide">
         <button class="btn btn-delete">Delete</button>
       </th>
