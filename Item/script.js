@@ -3,7 +3,8 @@ const oldHash = params.get("oldHash");
 const eventId = params.get("eventId");
 const kind = params.get("kind");
 const userUid = params.get("uid");
-const currentUser = getUsernameFromUid(userUid);
+//const currentUser = getUsernameFromUid(userUid);
+const currentUser = params.get("user");
 let createDeleteButton = false;
 
 getEvent(oldHash, kind, eventId);
