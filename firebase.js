@@ -101,6 +101,7 @@ function updateAuthUI(isLoggedIn) {
     const icon = btn ? btn.querySelector('.mdi') : null;
     const adminField = document.querySelector('.adminField');
     const panel = document.getElementById('authPanel');
+
     if (btn && label && icon) {
         if (isLoggedIn) {
             label.textContent = 'Logout';
@@ -116,21 +117,19 @@ function updateAuthUI(isLoggedIn) {
             btn.setAttribute('aria-label', 'Login');
         }
     }
-    // Always toggle .hide on all last th cells
-    let lastThs = document.querySelectorAll("tr th:last-child");
+
+    // Delete-Spalte NUR fuer Admins anzeigen
+    const lastThs = document.querySelectorAll("tr th:last-child");
     lastThs.forEach(th => {
-        th.classList.toggle('hide', window.IsAdmin);
+        th.classList.toggle('hide', !window.IsAdmin);
     });
 
+    // Admin-Eingabefeld sichtbar nur fuer Admins
     if (adminField) {
         adminField.classList.toggle('hide', !window.IsAdmin);
     }
-    if (window.IsAdmin) {
-        let lastThs = document.querySelectorAll("tr th:last-child");
-        lastThs.forEach(th => {
-            th.classList.toggle('hide', !window.IsAdmin);
-        });
-    }
+
+    // Auth-Panel: nur anzeigen, wenn ausgeloggt und explizit geoeffnet
     if (panel) {
         panel.classList.toggle('hide', isLoggedIn || !panel.classList.contains('open'));
     }

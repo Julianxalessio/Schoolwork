@@ -2,22 +2,15 @@ const params = new URLSearchParams(window.location.search);
 const oldHash = params.get("oldHash");
 const eventId = params.get("eventId");
 const kind = params.get("kind");
-const userUid = params.get("uid");
 
-//const currentUser = getUsernameFromUid(userUid);
-const currentUser = params.get("user");
-
-/*const currentUser = getUsernameFromUidwithRole(userUid);
-if (currentUser == "User unbekannt") {
-    closeWindow();
-}*/
+// Nutzer wird NICHT mehr via URL geparst; wird beim Laden via Firebase Auth gesetzt
 
 let createDeleteButton = false;
 
+// Event-Daten laden
 getEvent(oldHash, kind, eventId);
 
-refreshAdminFlag(userUid);
-
+// Wird nach erfolgreichem Auth-Init aus /Item/firebase.js aufgerufen
 function initialize() {
     console.log("Initialize");
     getCommentsFromFirebase(oldHash || "#", eventId || '', kind || '');
@@ -26,13 +19,18 @@ function initialize() {
 let skipNextOnValue = false;
 
 window.createCommentToFirebase = async function (createDeleteButton) {
-    if (currentUser === null) {
-        alert("User is not logged in");
+    // Login-Pflicht
+    if (!window.uid) {
+        alert("Bitte zuerst einloggen.");
         return;
     }
+
     const textarea = document.querySelector(".input-comment");
     const fileInput = document.querySelector(".comment-image-input");
-    if (!textarea) return console.error("Textarea .input-comment not found");
+    if (!textarea) {
+        console.error("Textarea .input-comment nicht gefunden");
+        return;
+    }
 
     const content = textarea.value.trim();
     if (!content && !fileInput.files.length) return; // Nichts zum Senden
@@ -42,7 +40,7 @@ window.createCommentToFirebase = async function (createDeleteButton) {
         imageUrl = await uploadImageToCloudinary(fileInput.files[0]);
     }
 
-    let Hash = oldHash.slice(1);
+    const Hash = (oldHash || "#").slice(1);
     const now = new Date();
     const pad = n => String(n).padStart(2, '0');
     const day = pad(now.getDate());
@@ -53,23 +51,21 @@ window.createCommentToFirebase = async function (createDeleteButton) {
     const ss = pad(now.getSeconds());
     const isoDate = `${day}.${month}.${year}, ${hh}:${mm}:${ss}`;
 
-    const user = currentUser || window.UserEmailLocal || 'anonymous';
+    const user = window.UserEmailLocal || 'anonymous';
 
-    // Direkt lokal anzeigen
-    createCommentForDiv(content, user, isoDate, createDeleteButton, imageUrl);
+    // Sofort lokal anzeigen
+    createCommentForDiv(content, user, isoDate, !!createDeleteButton, imageUrl);
 
     if (typeof window.createCommentOnFirebase === 'function') {
-        skipNextOnValue = true; // Damit onValue den gerade gesendeten Kommentar ignoriert
+        skipNextOnValue = true; // den gerade gesendeten Kommentar nicht doppelt zeichnen
         window.createCommentOnFirebase(Hash || "#", eventId || '', content, isoDate, kind || '', user, imageUrl)
             .then(() => {
                 textarea.value = '';
-                fileInput.value = null; // Input zurücksetzen
+                fileInput.value = null;
             })
             .catch(err => console.error('Fehler beim Erstellen des Kommentars:', err));
     }
 };
-
-
 
 document.addEventListener('DOMContentLoaded', () => {
     const sendBtn = document.querySelector('.send-btn');
@@ -80,7 +76,7 @@ function closeWindow() {
     window.location.replace(`../${oldHash}`);
 }
 
-window.createCommentForDiv = function (content, user, date, createDeleteButton, imageUrl = null) {
+window.createCommentForDiv = function (content, user, date, canDelete, imageUrl = null) {
     const comments = document.querySelector(".comments");
     if (!comments) return;
 
@@ -100,19 +96,20 @@ window.createCommentForDiv = function (content, user, date, createDeleteButton, 
 
     div.appendChild(userElement);
     div.appendChild(dateElement);
+
     const deleteButton = document.createElement("button");
     deleteButton.textContent = "Delete";
     deleteButton.classList.add("btn", "btn-delete");
     deleteButton.style.marginLeft = "10px";
-    if (window.IsAdmin || createDeleteButton) {
-        deleteButton.style.display = "inline-block";
+
+    const allowDelete = !!(window.IsAdmin || canDelete);
+    deleteButton.style.display = allowDelete ? "inline-block" : "none";
+    if (allowDelete) {
         deleteButton.addEventListener("click", (ev) => {
             ev.stopPropagation();
             deleteCommentFromFirebase(oldHash.slice(1), eventId, user, date, kind);
             div.remove();
         });
-    } else {
-        deleteButton.style.display = "none";
     }
 
     div.appendChild(deleteButton);
@@ -121,7 +118,7 @@ window.createCommentForDiv = function (content, user, date, createDeleteButton, 
     if (imageUrl) {
         const img = document.createElement("img");
         img.src = imageUrl;
-        img.style.maxHeight = "1200px"; // optional
+        img.style.maxHeight = "1200px";
         img.style.display = "block";
         img.style.marginTop = "5px";
         div.appendChild(img);
@@ -130,16 +127,15 @@ window.createCommentForDiv = function (content, user, date, createDeleteButton, 
     comments.appendChild(div);
 };
 
-
 function encodeKey(key) {
     return key.replace(/[.#$\[\]/]/g, c => '!' + c.charCodeAt(0));
-};
+}
 
 function UpdateEvent() {
-    let updateNameObject = document.querySelector(".update-name").value;
-    let updateDescriptionObject = document.querySelector(".update-description").value;
-    let updateDateObject = document.querySelector(".update-date").value;
-    console.log(updateNameObject, updateDateObject, updateDescriptionObject);
+    const updateNameObject = document.querySelector(".update-name").value;
+    const updateDescriptionObject = document.querySelector(".update-description").value;
+    const updateDateObject = document.querySelector(".update-date").value;
 
+    console.log(updateNameObject, updateDateObject, updateDescriptionObject);
     window.updateEventFromAdmin(oldHash, kind, eventId, updateNameObject, updateDateObject, updateDescriptionObject);
 }
