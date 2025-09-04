@@ -3,10 +3,15 @@ const oldHash = params.get("oldHash");
 const eventId = params.get("eventId");
 const kind = params.get("kind");
 const userUid = params.get("uid");
-const currentUser = getUsernameFromUidwithRole(userUid);
+
+//const currentUser = getUsernameFromUid(userUid);
+const currentUser = params.get("user");
+
+/*const currentUser = getUsernameFromUidwithRole(userUid);
 if (currentUser == "User unbekannt") {
     closeWindow();
-}
+}*/
+
 let createDeleteButton = false;
 
 getEvent(oldHash, kind, eventId);

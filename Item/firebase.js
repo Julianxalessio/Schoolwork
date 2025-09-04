@@ -60,7 +60,7 @@ window.refreshAdminFlag = function (user) {
 
 }
 
-window.getUsernameFromUid = async function (uid) {
+/*window.getUsernameFromUid = async function (uid) {
   const ref = doc(db, "users", uid);
   const snap = await getDoc(ref);
 
@@ -99,7 +99,7 @@ window.getUsernameFromUidwithRole = async function (uid) {
     alert("User nicht gefunden");
     return "User unbekannt";
   }
-}
+}*/
 
 window.createCommentOnFirebase = async function (Hash, ID, content, Datum, kind, user, imageData = null) {
     try {

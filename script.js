@@ -108,8 +108,8 @@ async function createEvent(Name, datum, kind) {
     NewTR.classList.add('Zeile');
 
     NewTR.innerHTML = `
-      <th>${Name}</th>
-      <th>${window.formatDateCH(datum)}</th>
+      <th>${Name.toString()}</th>
+      <th>${window.formatDateCH(datum).toString()}</th>
       <th class="hide">
         <button class="btn btn-delete">Delete</button>
       </th>
@@ -166,5 +166,5 @@ document.addEventListener("DOMContentLoaded", () => manageNavBarActive(null, fal
 
 function openEventSite(oldHash, Id, kind){
     console.log("Button pressed");
-    window.location.replace(window.location.origin + `/Item/?oldHash=${encodeURIComponent(oldHash)}&eventId=${encodeURIComponent(Id)}&kind=${encodeURIComponent(kind)}&uid=${encodeURIComponent(window.uid)}`);
+   window.location.replace(window.location.origin + `/Item/?oldHash=${encodeURIComponent(oldHash)}&eventId=${encodeURIComponent(Id)}&user=${encodeURIComponent(window.UserEmailLocal)}&kind=${encodeURIComponent(kind)}&uid=${encodeURIComponent(window.uid)}`);
 }
