@@ -177,7 +177,7 @@ u { text-underline-offset: 4px; }
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 22px;
     padding: calc(var(--nav-h) + 18px) 18px 24px;
-    width: min(1200px, 100%);
+    width: min(2000, 100%);
     margin: 0 auto;
 }
 
@@ -238,9 +238,10 @@ th {
     background: color-mix(in oklab, var(--muted) 35%, transparent);
 }
 
-.tableKind th:nth-child(1),  th:nth-child(1) { width: 50%; }
+.tableKind th:nth-child(1),  th:nth-child(1) { width: 25%; }
 .tableKind th:nth-child(2),  th:nth-child(2) { width: 25%; }
 .tableKind th:nth-child(3),  th:nth-child(3) { width: 25%; }
+.tableKind th:last-child,  th:last-child { width: 10%; }
 
 /* Empty state cell */
 .table-empty {

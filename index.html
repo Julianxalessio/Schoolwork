@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="de">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -23,7 +24,8 @@
         <a onclick="manageNavBarActive(this, true)" href="#ModulMorgen" class="navBarItem">Modul morgen</a>
         <a onclick="manageNavBarActive(this, true)" href="#ModulNachmittag" class="navBarItem">Modul nachmittag</a>
 
-        <a onclick="toggleAuth()" id="authBtn" class="adminLogin navBarItem" aria-label="Login"><span class="mdi mdi-login"></span>&nbsp;<span class="auth-label">Login</span></a>
+        <a onclick="toggleAuth()" id="authBtn" class="adminLogin navBarItem" aria-label="Login"><span
+                class="mdi mdi-login"></span>&nbsp;<span class="auth-label">Login</span></a>
     </nav>
 
     <div id="authPanel" class="authPanel hide">
@@ -79,7 +81,157 @@
         let button = document.querySelector(`.navBar a[href="#Home"]`);
         manageNavBarActive(button, false)
     </script>
+    <script type="module">
+        import {
+    initializeApp
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import {
+    getDatabase,
+    ref,
+    set,
+    remove,
+    onValue,
+    get
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+import {
+    getAuth,
+    onAuthStateChanged,
+    createUserWithEmailAndPassword,
+    signInWithEmailAndPassword,
+    signOut,
+    sendEmailVerification     // <-- neu
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
-    
+const firebaseConfig = {
+    apiKey: "AIzaSyA1f1LlbGrevYqPojOGjFZZFeSCg_TiPYI",
+    authDomain: "classroom-26016.firebaseapp.com",
+    databaseURL: "https://classroom-26016-default-rtdb.firebaseio.com",
+    projectId: "classroom-26016",
+    storageBucket: "classroom-26016.firebasestorage.app",
+    messagingSenderId: "494692974948",
+    appId: "1:494692974948:web:39458c2d78189f2a34fa71",
+    measurementId: "G-JM2KZCLH3W"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+const auth = getAuth(app);
+        let unsubTest = null;
+        let unsubTask = null;
+        window.loadAllEvents = function () {
+            // alte Listener entfernen
+            if (unsubTest) unsubTest();
+            if (unsubTask) unsubTask();
+
+            const hashes = ["WirtschaftRecht", "Deutsch", "Franz", "Sport", "Mathe", "ModulMorgen", "ModulNachmittag"];
+            const kinds = ["Test", "Task"];
+
+            let allTests = [];
+            let allTasks = [];
+
+            const unsubs = [];
+
+            kinds.forEach(kind => {
+                hashes.forEach(hash => {
+                    const tableId = (kind === "Test") ? "TableTest" : "TableTask";
+                    const path = `${hash}/${kind}`;
+                    const filesRef = ref(db, path);
+
+                    const handler = onValue(filesRef, (snapshot) => {
+                        const data = snapshot.val();
+                        window.ensureTableHeader(tableId);
+
+                        let arr = kind === "Test" ? allTests : allTasks;
+                        // Daten für diesen Hash aus Array rauswerfen (neu einlesen)
+                        arr = arr.filter(e => e.hash !== hash);
+
+                        if (data) {
+                            const entries = Object.entries(data).map(([id, v]) => ({
+                                id,
+                                hash,
+                                ...v
+                            }));
+                            arr.push(...entries);
+                        }
+
+                        if (kind === "Test") allTests = arr;
+                        else allTasks = arr;
+
+                        // Tabelle neu aufbauen
+                        const table = document.getElementById(tableId);
+                        table.innerHTML = ""; // reset
+
+                        const currentEntries = (kind === "Test") ? allTests : allTasks;
+
+                        if (currentEntries.length === 0) {
+                            window.updateEmptyState(tableId);
+                            return;
+                        }
+
+                        // nach Datum sortieren
+                        currentEntries.sort((a, b) => new Date(a.Datum) - new Date(b.Datum));
+
+                        currentEntries.forEach(({ id, Name, Datum, hash }) => {
+                            const tr = document.createElement("tr");
+                            tr.id = id;
+                            tr.dataset.date = Datum;
+                            tr.innerHTML = `
+                                <th>${Name}</th>
+                                <th>${window.formatDateCH(Datum)}</th>
+                                <th>${hash}</th>
+                                <th class="hide">
+                                    <button class="btn btn-delete">Delete</button>
+                                </th>
+                            `;
+
+                            if (window.IsAdmin) {
+                                let lastThs = document.querySelectorAll("tr th:last-child");
+                                lastThs.forEach(th => {
+                                    th.classList.toggle('hide', false);
+                                });
+                            }
+
+                            table.appendChild(tr);
+
+                            const deleteBtn = tr.querySelector('.btn-delete');
+                            if (deleteBtn) {
+                                deleteBtn.addEventListener('click', (ev) => {
+                                    ev.stopPropagation();
+                                    if (window.IsAdmin) {
+                                        tr.remove();
+                                        RemoveEvent(id, kind, hash);
+                                        window.updateEmptyState(tableId);
+                                    } else {
+                                        alert('No permission to delete event');
+                                    }
+                                });
+                            }
+
+                            tr.addEventListener('click', () => {
+                                openEventSite(hash, id, kind);
+                            });
+
+                            tr.style.cursor = 'pointer';
+                        });
+
+                        window.sortiereNachNaechstemDatum(tableId);
+                    });
+
+                    unsubs.push(handler);
+                });
+            });
+
+            unsubTest = () => unsubs.forEach(u => u && u()); // beide unsub hier
+            unsubTask = unsubTest; // gleiches unsub für beide
+        };
+        if (window.location.hash == "#Home" || window.location == "https://ipa25.ch/") {
+            console.log("Test");
+            loadAllEvents();
+        }
+        else {
+            console.log("Fehler");
+        }
+    </script>
 </body>
+
 </html>
