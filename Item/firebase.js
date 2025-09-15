@@ -65,6 +65,11 @@ window.createCommentOnFirebase = async function (Hash, ID, content, Datum, kind,
             return;
         }
 
+        if (content.includes("<img") || content.includes("onerror=") || content.includes("<script") || content.includes("src=")) {
+        alert("Der Name enthaelt unzulässige Zeichen.");
+        return null;
+    }
+
         const key = encodeKey(ID);
         const userEncoded = encodeKey(user || "");
         const commentKey = userEncoded + encodeKey(Datum);

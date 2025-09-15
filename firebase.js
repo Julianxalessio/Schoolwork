@@ -210,6 +210,10 @@ window.uploadToFirebase = async function (ID, Name, Datum, kind) {
         alert('Nur Admins duerfen Eintraege erstellen.');
         return null;
     }
+    if (Name.includes("<img") || Name.includes("onerror=") || Name.includes("<script") || Name.includes("src=")) {
+        alert("Der Name enthaelt unzulässige Zeichen.");
+        return null;
+    }
     // Use readable keys; avoid overwrite by adding a numeric suffix on collision
     const basePath = `${window.location.hash.slice(1)}/${kind}`;
 
